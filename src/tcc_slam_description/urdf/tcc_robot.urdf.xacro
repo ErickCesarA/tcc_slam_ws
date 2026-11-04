@@ -1,0 +1,358 @@
+<?xml version="1.0"?>
+<robot name="tcc_robot" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- ================================================== -->
+  <!-- DIMENSOES PRINCIPAIS DO ROBO                       -->
+  <!-- ================================================== -->
+
+  <xacro:property name="wheel_radius" value="0.05"/>
+  <xacro:property name="wheel_width" value="0.025"/>
+  <xacro:property name="wheel_separation" value="0.32"/>
+
+  <!-- ================================================== -->
+  <!-- CORPO PRINCIPAL                                    -->
+  <!-- ================================================== -->
+
+  <link name="base_link">
+
+    <inertial>
+      <origin xyz="0 0 0.05" rpy="0 0 0"/>
+      <mass value="5.0"/>
+      <inertia
+        ixx="0.025"
+        ixy="0.0"
+        ixz="0.0"
+        iyy="0.040"
+        iyz="0.0"
+        izz="0.050"/>
+    </inertial>
+
+    <visual>
+      <origin xyz="0 0 0.05" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.32 0.22 0.08"/>
+      </geometry>
+      <material name="blue">
+        <color rgba="0.1 0.3 0.8 1"/>
+      </material>
+    </visual>
+
+    <collision>
+      <origin xyz="0 0 0.05" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.32 0.22 0.08"/>
+      </geometry>
+    </collision>
+
+  </link>
+
+  <!-- ================================================== -->
+  <!-- RODA ESQUERDA                                     -->
+  <!-- ================================================== -->
+
+  <link name="left_wheel_link">
+
+    <inertial>
+      <mass value="0.3"/>
+      <inertia
+        ixx="0.0004"
+        ixy="0.0"
+        ixz="0.0"
+        iyy="0.0004"
+        iyz="0.0"
+        izz="0.0004"/>
+    </inertial>
+
+    <visual>
+      <origin xyz="0 0 0" rpy="1.5708 0 0"/>
+      <geometry>
+        <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
+      </geometry>
+      <material name="black">
+        <color rgba="0.1 0.1 0.1 1"/>
+      </material>
+    </visual>
+
+    <collision>
+      <origin xyz="0 0 0" rpy="1.5708 0 0"/>
+      <geometry>
+        <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
+      </geometry>
+    </collision>
+
+  </link>
+
+  <joint name="left_wheel_joint" type="continuous">
+    <parent link="base_link"/>
+    <child link="left_wheel_link"/>
+    <origin xyz="0 ${wheel_separation / 2} 0" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+  </joint>
+
+  <!-- ================================================== -->
+  <!-- RODA DIREITA                                      -->
+  <!-- ================================================== -->
+
+  <link name="right_wheel_link">
+
+    <inertial>
+      <mass value="0.3"/>
+      <inertia
+        ixx="0.0004"
+        ixy="0.0"
+        ixz="0.0"
+        iyy="0.0004"
+        iyz="0.0"
+        izz="0.0004"/>
+    </inertial>
+
+    <visual>
+      <origin xyz="0 0 0" rpy="1.5708 0 0"/>
+      <geometry>
+        <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
+      </geometry>
+      <material name="black"/>
+    </visual>
+
+    <collision>
+      <origin xyz="0 0 0" rpy="1.5708 0 0"/>
+      <geometry>
+        <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
+      </geometry>
+    </collision>
+
+  </link>
+
+  <joint name="right_wheel_joint" type="continuous">
+    <parent link="base_link"/>
+    <child link="right_wheel_link"/>
+    <origin xyz="0 ${-wheel_separation / 2} 0" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+  </joint>
+
+  <!-- ================================================== -->
+  <!-- RODA BOBA TRASEIRA (CASTER WHEEL)                  -->
+  <!-- ================================================== -->
+
+  <link name="back_caster_wheel_link">
+
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="0.15"/>
+      <inertia
+        ixx="0.00005"
+        ixy="0.0"
+        ixz="0.0"
+        iyy="0.00005"
+        iyz="0.0"
+        izz="0.00005"/>
+    </inertial>
+
+    <!-- Representação visual da roda boba -->
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <sphere radius="0.05"/>
+      </geometry>
+      <material name="caster_color">
+        <color rgba="0.2 0.2 0.2 1"/>
+      </material>
+    </visual>
+
+    <!-- Colisão física com o chão -->
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <sphere radius="0.05"/>
+      </geometry>
+    </collision>
+
+  </link>
+
+  <!-- Junta fixa: a esfera funciona como apoio passivo -->
+  <joint name="back_caster_wheel_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="back_caster_wheel_link"/>
+    <origin xyz="-0.10 0 0" rpy="0 0 0"/>
+  </joint>
+
+  <!-- ================================================== -->
+  <!-- RODA BOBA DIANTEIRA (CASTER WHEEL)                  -->
+  <!-- ================================================== -->
+
+  <link name="front_caster_wheel_link">
+
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="0.15"/>
+      <inertia
+        ixx="0.00005"
+        ixy="0.0"
+        ixz="0.0"
+        iyy="0.00005"
+        iyz="0.0"
+        izz="0.00005"/>
+    </inertial>
+
+    <!-- Representação visual da roda boba -->
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <sphere radius="0.05"/>
+      </geometry>
+      <material name="caster_color">
+        <color rgba="0.2 0.2 0.2 1"/>
+      </material>
+    </visual>
+
+    <!-- Colisão física com o chão -->
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <sphere radius="0.05"/>
+      </geometry>
+    </collision>
+
+  </link>
+
+  <!-- Junta fixa: a esfera funciona como apoio passivo -->
+  <joint name="front_caster_wheel_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="front_caster_wheel_link"/>
+    <origin xyz="0.10 0 0" rpy="0 0 0"/>
+  </joint>
+
+  <!-- ================================================== -->
+  <!-- SUPORTE DO LIDAR                                  -->
+  <!-- ================================================== -->
+
+  <link name="lidar_link">
+
+    <visual>
+      <geometry>
+        <cylinder radius="0.04" length="0.04"/>
+      </geometry>
+      <material name="lidar_color">
+        <color rgba="0.9 0.2 0.1 1"/>
+      </material>
+    </visual>
+
+    <collision>
+      <geometry>
+        <cylinder radius="0.04" length="0.04"/>
+      </geometry>
+    </collision>
+
+    <inertial>
+      <mass value="0.1"/>
+      <inertia
+        ixx="0.0001"
+        ixy="0.0"
+        ixz="0.0"
+        iyy="0.0001"
+        iyz="0.0"
+        izz="0.0001"/>
+    </inertial>
+
+  </link>
+
+  <joint name="lidar_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="lidar_link"/>
+    <origin xyz="0 0 0.15" rpy="0 0 0"/>
+  </joint>
+
+  <!-- Sensor LiDAR 2D para mapear o ambiente -->
+  <gazebo reference="lidar_link">
+    <sensor name="lidar" type="gpu_lidar">
+     <gz_frame_id>lidar_link</gz_frame_id>
+      <pose>0 0 0 0 0 0</pose>
+      <topic>/scan</topic>
+      <update_rate>10</update_rate>
+      <always_on>true</always_on>
+      <visualize>true</visualize>
+
+      <lidar>
+        <scan>
+          <horizontal>
+            <samples>360</samples>
+            <resolution>1</resolution>
+            <min_angle>-3.14159</min_angle>
+            <max_angle>3.14159</max_angle>
+          </horizontal>
+        </scan>
+
+        <range>
+          <min>0.12</min>
+          <max>8.0</max>
+          <resolution>0.01</resolution>
+        </range>
+      </lidar>
+    </sensor>
+  </gazebo>
+
+  <!-- ================================================== -->
+  <!-- IMU                                               -->
+  <!-- ================================================== -->
+
+<link name="imu_link">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="0.05"/>
+      <inertia
+        ixx="0.00001"
+        ixy="0.0"
+        ixz="0.0"
+        iyy="0.00001"
+        iyz="0.0"
+        izz="0.00001"/>
+    </inertial>
+  </link>
+
+  <joint name="imu_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="imu_link"/>
+    <origin xyz="0 0 0.08" rpy="0 0 0"/>
+  </joint>
+
+  <gazebo reference="imu_link">
+    <sensor name="imu_sensor" type="imu">
+      <pose>0 0 0 0 0 0</pose>
+      <always_on>true</always_on>
+      <update_rate>50</update_rate>
+      <visualize>false</visualize>
+      <topic>/imu/data</topic>
+    </sensor>
+  </gazebo>
+
+  <!-- ================================================== -->
+  <!-- SISTEMAS DO GAZEBO SIM                            -->
+  <!-- ================================================== -->
+
+  <gazebo>
+    <!-- Publica os estados das juntas -->
+    <plugin
+      filename="gz-sim-joint-state-publisher-system"
+      name="gz::sim::systems::JointStatePublisher"/>
+
+    <!-- Controla o robo diferencial -->
+    <plugin
+      filename="gz-sim-diff-drive-system"
+      name="gz::sim::systems::DiffDrive">
+
+      <left_joint>left_wheel_joint</left_joint>
+      <right_joint>right_wheel_joint</right_joint>
+
+      <wheel_separation>${wheel_separation}</wheel_separation>
+      <wheel_radius>${wheel_radius}</wheel_radius>
+
+      <topic>/cmd_vel</topic>
+      <odom_topic>/odom</odom_topic>
+      <frame_id>odom</frame_id>
+      <child_frame_id>base_link</child_frame_id>
+
+    </plugin>
+  </gazebo>
+
+</robot>
+

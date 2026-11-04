@@ -1,0 +1,225 @@
+<?xml version="1.0" ?>
+<sdf version="1.9">
+  <world name="tcc_world">
+
+    <!-- Física da simulação -->
+    
+    <gravity> 0 0 -9.81</gravity>
+    
+    <physics name="1ms" type="ignored">
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>1.0</real_time_factor>
+    </physics>
+
+    <!-- Sistemas necessários ao Gazebo Sim -->
+    <plugin filename="gz-sim-physics-system"
+            name="gz::sim::systems::Physics"/>
+
+    <plugin filename="gz-sim-user-commands-system"
+            name="gz::sim::systems::UserCommands"/>
+
+    <plugin filename="gz-sim-scene-broadcaster-system"
+            name="gz::sim::systems::SceneBroadcaster"/>
+
+   <!-- Sistem geral de sensores -->
+    <plugin filename="gz-sim-sensors-system"
+            name="gz::sim::systems::Sensors">
+      <render_engine>ogre2</render_engine>
+    </plugin>
+   
+   <!-- Sistema respons'avel pela IMU -->
+    <plugin filename="gz-sim-imu-system"
+        name="gz::sim::systems::Imu"/>
+
+    <!-- Iluminação -->
+    <light name="sun" type="directional">
+      <cast_shadows>true</cast_shadows>
+      <pose>0 0 10 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.2 0.2 0.2 1</specular>
+      <direction>-0.5 0.1 -0.9</direction>
+    </light>
+
+    <!-- Chão -->
+    <model name="ground">
+      <static>true</static>
+      <link name="ground_link">
+        <collision name="ground_collision">
+          <geometry>
+            <box>
+              <size>10 10 0.1</size>
+            </box>
+          </geometry>
+        </collision>
+
+        <visual name="ground_visual">
+          <geometry>
+            <box>
+              <size>10 10 0.1</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.7 0.7 0.7 1</ambient>
+            <diffuse>0.7 0.7 0.7 1</diffuse>
+          </material>
+        </visual>
+      </link>
+      <pose>0 0 -0.05 0 0 0</pose>
+    </model>
+
+    <!-- Parede norte -->
+    <model name="wall_north">
+      <static>true</static>
+      <link name="wall">
+        <collision name="collision">
+          <geometry>
+            <box><size>10 0.1 1</size></box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box><size>10 0.1 1</size></box>
+          </geometry>
+          <material>
+            <ambient>0.3 0.3 0.35 1</ambient>
+            <diffuse>0.3 0.3 0.35 1</diffuse>
+          </material>
+        </visual>
+      </link>
+      <pose>0 5 0.5 0 0 0</pose>
+    </model>
+
+    <!-- Parede sul -->
+    <model name="wall_south">
+      <static>true</static>
+      <link name="wall">
+        <collision name="collision">
+          <geometry>
+            <box><size>10 0.1 1</size></box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box><size>10 0.1 1</size></box>
+          </geometry>
+          <material>
+            <ambient>0.3 0.3 0.35 1</ambient>
+            <diffuse>0.3 0.3 0.35 1</diffuse>
+          </material>
+        </visual>
+      </link>
+      <pose>0 -5 0.5 0 0 0</pose>
+    </model>
+
+    <!-- Parede leste -->
+    <model name="wall_east">
+      <static>true</static>
+      <link name="wall">
+        <collision name="collision">
+          <geometry>
+            <box><size>0.1 10 1</size></box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box><size>0.1 10 1</size></box>
+          </geometry>
+          <material>
+            <ambient>0.3 0.3 0.35 1</ambient>
+            <diffuse>0.3 0.3 0.35 1</diffuse>
+          </material>
+        </visual>
+      </link>
+      <pose>5 0 0.5 0 0 0</pose>
+    </model>
+
+    <!-- Parede oeste -->
+    <model name="wall_west">
+      <static>true</static>
+      <link name="wall">
+        <collision name="collision">
+          <geometry>
+            <box><size>0.1 10 1</size></box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box><size>0.1 10 1</size></box>
+          </geometry>
+          <material>
+            <ambient>0.3 0.3 0.35 1</ambient>
+            <diffuse>0.3 0.3 0.35 1</diffuse>
+          </material>
+        </visual>
+      </link>
+      <pose>-5 0 0.5 0 0 0</pose>
+    </model>
+
+    <!-- Obstáculo 1: bloco central -->
+    <model name="obstacle_1">
+      <static>true</static>
+      <link name="obstacle">
+        <collision name="collision">
+          <geometry>
+            <box><size>1 1 0.6</size></box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box><size>1 1 0.6</size></box>
+          </geometry>
+          <material>
+            <ambient>0.8 0.3 0.2 1</ambient>
+            <diffuse>0.8 0.3 0.2 1</diffuse>
+          </material>
+        </visual>
+      </link>
+      <pose>1 1 0.3 0 0 0</pose>
+    </model>
+
+    <!-- Obstáculo 2: bloco à esquerda -->
+    <model name="obstacle_2">
+      <static>true</static>
+      <link name="obstacle">
+        <collision name="collision">
+          <geometry>
+            <box><size>0.6 1.5 0.6</size></box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box><size>0.6 1.5 0.6</size></box>
+          </geometry>
+          <material>
+            <ambient>0.2 0.4 0.8 1</ambient>
+            <diffuse>0.2 0.4 0.8 1</diffuse>
+          </material>
+        </visual>
+      </link>
+      <pose>-2 1 0.3 0 0 0</pose>
+    </model>
+
+    <!-- Obstáculo 3: bloco à direita -->
+    <model name="obstacle_3">
+      <static>true</static>
+      <link name="obstacle">
+        <collision name="collision">
+          <geometry>
+            <box><size>1.5 0.6 0.6</size></box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box><size>1.5 0.6 0.6</size></box>
+          </geometry>
+          <material>
+            <ambient>0.2 0.7 0.3 1</ambient>
+            <diffuse>0.2 0.7 0.3 1</diffuse>
+          </material>
+        </visual>
+      </link>
+      <pose>-1 -2 0.3 0 0 0</pose>
+    </model>
+
+  </world>
+</sdf>

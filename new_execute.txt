@@ -1,0 +1,17 @@
+Terminal 1 — Iniciar simulação e navegação:
+
+source /opt/ros/lyrical/setup.bash
+source ~/tcc_slam_ws/install/setup.bash
+
+ros2 launch tcc_slam_bringup navigation.launch.py
+
+Terminal 2 — Executar experimento:
+
+source /opt/ros/lyrical/setup.bash
+source ~/tcc_slam_ws/install/setup.bash
+
+python3 ~/tcc_slam_ws/executar_experimento.py x --duracao 600
+
+Terminal 3 — Analisar resultados:
+
+~/tcc_slam_ws/analisar_experimento.sh x
