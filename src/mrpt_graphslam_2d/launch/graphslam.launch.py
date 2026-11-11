@@ -1,0 +1,153 @@
+# Copyright (c) 2024-2026, Jose Luis Blanco-Claraco.
+#
+# Use of this source code is governed by a BSD-style
+# license that can be found in the LICENSE file or at
+# https://developers.google.com/open-source/licenses/bsd
+
+"""Launch file for mrpt_graphslam_2d single-robot mode."""
+
+from launch import LaunchDescription
+from launch.actions import DeclareLaunchArgument
+from launch.conditions import IfCondition
+from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
+
+from launch_ros.actions import Node
+from launch_ros.substitutions import FindPackageShare
+
+
+def generate_launch_description():
+    """Generate launch description for single-robot graphSLAM."""
+    pkg_share = FindPackageShare('mrpt_graphslam_2d')
+
+    # Declare launch arguments
+    config_file_arg = DeclareLaunchArgument(
+        'config_file',
+        default_value=PathJoinSubstitution([
+            pkg_share, 'config', 'ros_laser_odometry.ini'
+        ]),
+        description='Full path to the MRPT .ini configuration file'
+    )
+
+    anchor_frame_arg = DeclareLaunchArgument(
+        'anchor_frame_id',
+        default_value='map',
+        description='Frame ID for the anchor/map frame'
+    )
+
+    base_link_frame_arg = DeclareLaunchArgument(
+        'base_link_frame_id',
+        default_value='base_link',
+        description='Frame ID for the robot base frame'
+    )
+
+    odom_frame_arg = DeclareLaunchArgument(
+        'odom_frame_id',
+        default_value='odom',
+        description='Frame ID for the odometry frame'
+    )
+
+    nrd_arg = DeclareLaunchArgument(
+        'NRD',
+        default_value='CFixedIntervalsNRD',
+        description='Node Registration Decider class name'
+    )
+
+    erd_arg = DeclareLaunchArgument(
+        'ERD',
+        default_value='CICPCriteriaERD',
+        description='Edge Registration Decider class name'
+    )
+
+    gso_arg = DeclareLaunchArgument(
+        'GSO',
+        default_value='CLevMarqGSO',
+        description='Graph SLAM Optimizer class name'
+    )
+
+    disable_visuals_arg = DeclareLaunchArgument(
+        'disable_MRPT_visuals',
+        default_value='true',
+        description='Disable MRPT GUI windows (true by default for headless/ROS execution)'
+    )
+
+    verbosity_arg = DeclareLaunchArgument(
+        'verbosity',
+        default_value='1',
+        description='Logging verbosity level (0=DEBUG, 1=INFO, 2=WARN, 3=ERROR)'
+    )
+
+    output_directory_arg = DeclareLaunchArgument(
+        'output_directory',
+        default_value='',
+        description=(
+            'Directory for SLAM result files. Overrides the ini output_dir_fname '
+            'setting. Must not be empty if set. Leave empty to use the ini default.'
+        )
+    )
+
+    launch_rviz_arg = DeclareLaunchArgument(
+        'launch_rviz',
+        default_value='false',
+        description='Launch RViz2 for visualization'
+    )
+
+    rviz_config_arg = DeclareLaunchArgument(
+        'rviz_config',
+        default_value=PathJoinSubstitution([
+            pkg_share, 'rviz', 'sr_graphslam.rviz'
+        ]),
+        description='Full path to the RViz configuration file'
+    )
+
+    # GraphSLAM node
+    graphslam_node = Node(
+        package='mrpt_graphslam_2d',
+        executable='mrpt_graphslam_2d_node',
+        name='mrpt_graphslam_2d',
+        output='screen',
+        parameters=[{
+            'config_file': LaunchConfiguration('config_file'),
+            'anchor_frame_id': LaunchConfiguration('anchor_frame_id'),
+            'base_link_frame_id': LaunchConfiguration('base_link_frame_id'),
+            'odom_frame_id': LaunchConfiguration('odom_frame_id'),
+            'NRD': LaunchConfiguration('NRD'),
+            'ERD': LaunchConfiguration('ERD'),
+            'GSO': LaunchConfiguration('GSO'),
+            'disable_MRPT_visuals': LaunchConfiguration('disable_MRPT_visuals'),
+            'verbosity': LaunchConfiguration('verbosity'),
+            'output_directory': LaunchConfiguration('output_directory'),
+            'user_sim_true':True,
+        }],
+        remappings=[
+            ("/input/laser_scan", "/scan"),
+            ("/input/odom", "/odom"),
+            ("/feedback/gridmap","/map")
+        ],
+    )
+
+    # RViz node (conditional)
+    rviz_node = Node(
+        package='rviz2',
+        executable='rviz2',
+        name='rviz_graphslam',
+        output='screen',
+        arguments=['-d', LaunchConfiguration('rviz_config')],
+        condition=IfCondition(LaunchConfiguration('launch_rviz')),
+    )
+
+    return LaunchDescription([
+        config_file_arg,
+        anchor_frame_arg,
+        base_link_frame_arg,
+        odom_frame_arg,
+        nrd_arg,
+        erd_arg,
+        gso_arg,
+        disable_visuals_arg,
+        verbosity_arg,
+        output_directory_arg,
+        launch_rviz_arg,
+        rviz_config_arg,
+        graphslam_node,
+        rviz_node,
+    ])

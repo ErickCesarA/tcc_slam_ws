@@ -1,0 +1,139 @@
+[INFO] [1794322507.045206694] [ekf_map_builder]: EKF Map Builder iniciado.
+[INFO] [1794322517.682571934] [ekf_map_builder]: Mapa publicado. Scans integrados: 20
+[INFO] [1794322527.682599859] [ekf_map_builder]: Mapa publicado. Scans integrados: 40
+[INFO] [1794322537.682300948] [ekf_map_builder]: Mapa publicado. Scans integrados: 60
+[INFO] [1794322547.682356484] [ekf_map_builder]: Mapa publicado. Scans integrados: 80
+[INFO] [1794322557.682357530] [ekf_map_builder]: Mapa publicado. Scans integrados: 100
+[INFO] [1794322567.682470112] [ekf_map_builder]: Mapa publicado. Scans integrados: 120
+[INFO] [1794322577.682258532] [ekf_map_builder]: Mapa publicado. Scans integrados: 140
+[INFO] [1794322587.682351749] [ekf_map_builder]: Mapa publicado. Scans integrados: 160
+[INFO] [1794322597.683891384] [ekf_map_builder]: Mapa publicado. Scans integrados: 180
+[INFO] [1794322607.682575589] [ekf_map_builder]: Mapa publicado. Scans integrados: 200
+[INFO] [1794322617.682314061] [ekf_map_builder]: Mapa publicado. Scans integrados: 220
+[INFO] [1794322627.683757282] [ekf_map_builder]: Mapa publicado. Scans integrados: 240
+[INFO] [1794322637.682289912] [ekf_map_builder]: Mapa publicado. Scans integrados: 260
+[INFO] [1794322647.682291729] [ekf_map_builder]: Mapa publicado. Scans integrados: 280
+[INFO] [1794322657.682193203] [ekf_map_builder]: Mapa publicado. Scans integrados: 300
+[INFO] [1794322667.682409814] [ekf_map_builder]: Mapa publicado. Scans integrados: 320
+[INFO] [1794322677.682375703] [ekf_map_builder]: Mapa publicado. Scans integrados: 340
+[INFO] [1794322687.682385019] [ekf_map_builder]: Mapa publicado. Scans integrados: 360
+[INFO] [1794322697.682287869] [ekf_map_builder]: Mapa publicado. Scans integrados: 380
+[INFO] [1794322707.682326332] [ekf_map_builder]: Mapa publicado. Scans integrados: 400
+[INFO] [1794322717.682240541] [ekf_map_builder]: Mapa publicado. Scans integrados: 420
+[INFO] [1794322727.682538107] [ekf_map_builder]: Mapa publicado. Scans integrados: 440
+[INFO] [1794322737.762792741] [ekf_map_builder]: Mapa publicado. Scans integrados: 460
+[INFO] [1794322747.762451750] [ekf_map_builder]: Mapa publicado. Scans integrados: 480
+[INFO] [1794322757.762411205] [ekf_map_builder]: Mapa publicado. Scans integrados: 500
+[INFO] [1794322767.762784998] [ekf_map_builder]: Mapa publicado. Scans integrados: 520
+[INFO] [1794322777.762727252] [ekf_map_builder]: Mapa publicado. Scans integrados: 540
+[INFO] [1794322787.762315158] [ekf_map_builder]: Mapa publicado. Scans integrados: 560
+[INFO] [1794322797.762921039] [ekf_map_builder]: Mapa publicado. Scans integrados: 580
+[INFO] [1794322807.762539209] [ekf_map_builder]: Mapa publicado. Scans integrados: 600
+[INFO] [1794322817.762418163] [ekf_map_builder]: Mapa publicado. Scans integrados: 620
+[INFO] [1794322827.762269032] [ekf_map_builder]: Mapa publicado. Scans integrados: 640
+[INFO] [1794322837.762708732] [ekf_map_builder]: Mapa publicado. Scans integrados: 660
+[INFO] [1794322847.762414358] [ekf_map_builder]: Mapa publicado. Scans integrados: 680
+[INFO] [1794322857.764289976] [ekf_map_builder]: Mapa publicado. Scans integrados: 700
+[INFO] [1794322867.763610417] [ekf_map_builder]: Mapa publicado. Scans integrados: 720
+[INFO] [1794322877.763416727] [ekf_map_builder]: Mapa publicado. Scans integrados: 740
+[INFO] [1794322887.763670258] [ekf_map_builder]: Mapa publicado. Scans integrados: 760
+[INFO] [1794322897.763525335] [ekf_map_builder]: Mapa publicado. Scans integrados: 780
+[INFO] [1794322907.763396276] [ekf_map_builder]: Mapa publicado. Scans integrados: 800
+[INFO] [1794322917.765053525] [ekf_map_builder]: Mapa publicado. Scans integrados: 820
+[INFO] [1794322927.764569198] [ekf_map_builder]: Mapa publicado. Scans integrados: 840
+[INFO] [1794322937.764496281] [ekf_map_builder]: Mapa publicado. Scans integrados: 860
+[INFO] [1794322947.816400199] [ekf_map_builder]: Mapa publicado. Scans integrados: 880
+[INFO] [1794322957.816502125] [ekf_map_builder]: Mapa publicado. Scans integrados: 900
+[INFO] [1794322967.816210326] [ekf_map_builder]: Mapa publicado. Scans integrados: 920
+[INFO] [1794322977.816449949] [ekf_map_builder]: Mapa publicado. Scans integrados: 940
+[INFO] [1794322987.818451182] [ekf_map_builder]: Mapa publicado. Scans integrados: 960
+[INFO] [1794322997.821225171] [ekf_map_builder]: Mapa publicado. Scans integrados: 980
+[INFO] [1794323007.821266292] [ekf_map_builder]: Mapa publicado. Scans integrados: 1000
+[INFO] [1794323017.823403697] [ekf_map_builder]: Mapa publicado. Scans integrados: 1020
+[INFO] [1794323027.829323507] [ekf_map_builder]: Mapa publicado. Scans integrados: 1040
+[INFO] [1794323037.830976478] [ekf_map_builder]: Mapa publicado. Scans integrados: 1060
+[INFO] [1794323047.830960022] [ekf_map_builder]: Mapa publicado. Scans integrados: 1080
+[INFO] [1794323057.832518161] [ekf_map_builder]: Mapa publicado. Scans integrados: 1100
+[INFO] [1794323067.833468019] [ekf_map_builder]: Mapa publicado. Scans integrados: 1120
+[INFO] [1794323077.836275283] [ekf_map_builder]: Mapa publicado. Scans integrados: 1140
+[INFO] [1794323087.837301315] [ekf_map_builder]: Mapa publicado. Scans integrados: 1160
+[INFO] [1794323097.837403863] [ekf_map_builder]: Mapa publicado. Scans integrados: 1180
+[INFO] [1794323107.837505137] [ekf_map_builder]: Mapa publicado. Scans integrados: 1200
+[INFO] [1794323117.837334432] [ekf_map_builder]: Mapa publicado. Scans integrados: 1220
+[INFO] [1794323127.838630660] [ekf_map_builder]: Mapa publicado. Scans integrados: 1240
+[INFO] [1794323137.838638584] [ekf_map_builder]: Mapa publicado. Scans integrados: 1260
+[INFO] [1794323147.838728304] [ekf_map_builder]: Mapa publicado. Scans integrados: 1280
+[INFO] [1794323157.838458239] [ekf_map_builder]: Mapa publicado. Scans integrados: 1300
+[INFO] [1794323167.838906822] [ekf_map_builder]: Mapa publicado. Scans integrados: 1320
+[INFO] [1794323177.838662632] [ekf_map_builder]: Mapa publicado. Scans integrados: 1340
+[INFO] [1794323187.838773528] [ekf_map_builder]: Mapa publicado. Scans integrados: 1360
+[INFO] [1794323197.838668262] [ekf_map_builder]: Mapa publicado. Scans integrados: 1380
+[INFO] [1794323207.839966208] [ekf_map_builder]: Mapa publicado. Scans integrados: 1400
+[INFO] [1794323217.838843945] [ekf_map_builder]: Mapa publicado. Scans integrados: 1420
+[INFO] [1794323227.838713276] [ekf_map_builder]: Mapa publicado. Scans integrados: 1440
+[INFO] [1794323237.838808886] [ekf_map_builder]: Mapa publicado. Scans integrados: 1460
+[INFO] [1794323247.838590645] [ekf_map_builder]: Mapa publicado. Scans integrados: 1480
+[INFO] [1794323257.838814441] [ekf_map_builder]: Mapa publicado. Scans integrados: 1500
+[INFO] [1794323267.838601252] [ekf_map_builder]: Mapa publicado. Scans integrados: 1520
+[INFO] [1794323277.838668175] [ekf_map_builder]: Mapa publicado. Scans integrados: 1540
+[INFO] [1794323287.838920364] [ekf_map_builder]: Mapa publicado. Scans integrados: 1560
+[INFO] [1794323297.839933737] [ekf_map_builder]: Mapa publicado. Scans integrados: 1580
+[INFO] [1794323307.840123082] [ekf_map_builder]: Mapa publicado. Scans integrados: 1600
+[INFO] [1794323317.841340132] [ekf_map_builder]: Mapa publicado. Scans integrados: 1620
+[INFO] [1794323327.841169411] [ekf_map_builder]: Mapa publicado. Scans integrados: 1640
+[INFO] [1794323337.841188421] [ekf_map_builder]: Mapa publicado. Scans integrados: 1660
+[INFO] [1794323347.841415375] [ekf_map_builder]: Mapa publicado. Scans integrados: 1680
+[INFO] [1794323357.841260108] [ekf_map_builder]: Mapa publicado. Scans integrados: 1700
+[INFO] [1794323367.841202634] [ekf_map_builder]: Mapa publicado. Scans integrados: 1720
+[INFO] [1794323377.841233298] [ekf_map_builder]: Mapa publicado. Scans integrados: 1740
+[INFO] [1794323387.841205393] [ekf_map_builder]: Mapa publicado. Scans integrados: 1760
+[INFO] [1794323397.841692717] [ekf_map_builder]: Mapa publicado. Scans integrados: 1780
+[INFO] [1794323407.841886981] [ekf_map_builder]: Mapa publicado. Scans integrados: 1800
+[INFO] [1794323417.841167272] [ekf_map_builder]: Mapa publicado. Scans integrados: 1820
+[INFO] [1794323427.841437369] [ekf_map_builder]: Mapa publicado. Scans integrados: 1840
+[INFO] [1794323437.841270655] [ekf_map_builder]: Mapa publicado. Scans integrados: 1860
+[INFO] [1794323447.841479423] [ekf_map_builder]: Mapa publicado. Scans integrados: 1880
+[INFO] [1794323457.841558287] [ekf_map_builder]: Mapa publicado. Scans integrados: 1900
+[INFO] [1794323467.841441540] [ekf_map_builder]: Mapa publicado. Scans integrados: 1920
+[INFO] [1794323477.841185905] [ekf_map_builder]: Mapa publicado. Scans integrados: 1940
+[INFO] [1794323487.841689592] [ekf_map_builder]: Mapa publicado. Scans integrados: 1960
+[INFO] [1794323497.841313707] [ekf_map_builder]: Mapa publicado. Scans integrados: 1980
+[INFO] [1794323507.841313504] [ekf_map_builder]: Mapa publicado. Scans integrados: 2000
+[INFO] [1794323517.841156817] [ekf_map_builder]: Mapa publicado. Scans integrados: 2020
+[INFO] [1794323527.841516273] [ekf_map_builder]: Mapa publicado. Scans integrados: 2040
+[INFO] [1794323537.841223851] [ekf_map_builder]: Mapa publicado. Scans integrados: 2060
+[INFO] [1794323547.841414533] [ekf_map_builder]: Mapa publicado. Scans integrados: 2080
+[INFO] [1794323557.841751855] [ekf_map_builder]: Mapa publicado. Scans integrados: 2100
+[INFO] [1794323567.841212204] [ekf_map_builder]: Mapa publicado. Scans integrados: 2120
+[INFO] [1794323577.841197494] [ekf_map_builder]: Mapa publicado. Scans integrados: 2140
+[INFO] [1794323587.841455704] [ekf_map_builder]: Mapa publicado. Scans integrados: 2160
+[INFO] [1794323597.841316059] [ekf_map_builder]: Mapa publicado. Scans integrados: 2180
+[INFO] [1794323607.841484910] [ekf_map_builder]: Mapa publicado. Scans integrados: 2200
+[INFO] [1794323617.841262781] [ekf_map_builder]: Mapa publicado. Scans integrados: 2220
+[INFO] [1794323627.841276652] [ekf_map_builder]: Mapa publicado. Scans integrados: 2240
+[INFO] [1794323637.841229237] [ekf_map_builder]: Mapa publicado. Scans integrados: 2260
+[INFO] [1794323647.841151861] [ekf_map_builder]: Mapa publicado. Scans integrados: 2280
+[INFO] [1794323657.841293849] [ekf_map_builder]: Mapa publicado. Scans integrados: 2300
+Traceback (most recent call last):
+  File "/home/erick/tcc_slam_ws/src/tcc_slam_bringup/scripts/ekf_map_builder.py", line 411, in <module>
+    main()
+    ~~~~^^
+  File "/home/erick/tcc_slam_ws/src/tcc_slam_bringup/scripts/ekf_map_builder.py", line 398, in main
+    rclpy.spin(node)
+    ~~~~~~~~~~^^^^^^
+  File "/opt/ros/lyrical/lib/python3.14/site-packages/rclpy/__init__.py", line 324, in spin
+    executor.spin_once()
+    ~~~~~~~~~~~~~~~~~~^^
+  File "/opt/ros/lyrical/lib/python3.14/site-packages/rclpy/executors.py", line 1033, in spin_once
+    self._spin_once_impl(timeout_sec)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/opt/ros/lyrical/lib/python3.14/site-packages/rclpy/executors.py", line 1013, in _spin_once_impl
+    handler, entity, node = self.wait_for_ready_callbacks(
+                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        timeout_sec, None, wait_condition)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/ros/lyrical/lib/python3.14/site-packages/rclpy/executors.py", line 983, in wait_for_ready_callbacks
+    return next(self._cb_iter)
+  File "/opt/ros/lyrical/lib/python3.14/site-packages/rclpy/executors.py", line 889, in _wait_for_ready_callbacks
+    raise ExternalShutdownException()
+rclpy.executors.ExternalShutdownException

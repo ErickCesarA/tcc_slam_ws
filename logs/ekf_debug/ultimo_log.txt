@@ -1,0 +1,1 @@
+/home/erick/tcc_slam_ws/logs/ekf_debug/20261110_115500_222918

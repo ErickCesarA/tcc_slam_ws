@@ -1057,6 +1057,13 @@ def main():
     )
 
     parser.add_argument(
+        "--metodo",
+        choices=["toolbox", "graph", "rbpf", "ekf", "nao_informado"],
+        default="nao_informado",
+        help="Metodo SLAM declarado pelo executor (nao inferido do rosbag)",
+    )
+
+    parser.add_argument(
         "--alinhamento",
         choices=["inicial", "nenhum"],
         default="inicial",
@@ -1110,6 +1117,8 @@ def main():
     print("ANÁLISE INDIVIDUAL DO EXPERIMENTO")
     print("====================================")
 
+    print(f"Metodo declarado: {args.metodo}")
+    print(f"Duracao solicitada: {args.duracao:g} s simulados")
     print("\nLendo rosbag...")
 
     dados = ler_rosbag(
@@ -1153,11 +1162,27 @@ def main():
         primeiros_objetivos["tempo_s"].min()
     )
 
-    fim = inicio + args.duracao
+    fim_previsto = inicio + args.duracao
 
-    print(f"\nInício simulado: {inicio:.3f} s")
-    print(f"Fim previsto: {fim:.3f} s")
-    print(f"Duração configurada: {args.duracao:.1f} s")
+    # A disponibilidade dos dados nao deve ser confundida com
+    # a duracao solicitada. Nao extrapolamos metricas alem do clock.
+    clocks = np.asarray(dados["clocks"], dtype=float)
+    clocks_validos = clocks[np.isfinite(clocks) & (clocks >= inicio)]
+    if len(clocks_validos) == 0:
+        raise RuntimeError("Nao ha /clock valido apos o primeiro GOAL_SENT.")
+    ultimo_clock = float(np.max(clocks_validos))
+    fim = min(fim_previsto, ultimo_clock)
+    if fim <= inicio:
+        raise RuntimeError("Duracao observada insuficiente para analisar.")
+
+    duracao_observada = fim - inicio
+    intervalo_completo = bool(ultimo_clock >= fim_previsto - 0.1)
+    print(f"\nInicio no relogio simulado (absoluto): {inicio:.3f} s")
+    print(f"Fim previsto no relogio simulado (absoluto): {fim_previsto:.3f} s")
+    print(f"Duracao solicitada: {args.duracao:.3f} s")
+    print(f"Duracao disponivel para analise: {duracao_observada:.3f} s")
+    if not intervalo_completo:
+        print("AVISO: gravacao incompleta em relacao a duracao solicitada.")
 
     # --------------------------------------------------------
     # ANÁLISE DA ODOMETRIA
@@ -1180,9 +1205,12 @@ def main():
         )
 
     resultados = {
+        "experimento_metodo_slam": args.metodo,
         "experimento_inicio_simulado_s": inicio,
-        "experimento_fim_previsto_s": fim,
+        "experimento_fim_previsto_s": fim_previsto,
+        "experimento_fim_analisado_s": fim,
         "experimento_duracao_configurada_s": args.duracao,
+        "experimento_duracao_analisada_s": duracao_observada,
         "experimento_alinhamento": args.alinhamento,
     }
 
@@ -1207,7 +1235,7 @@ def main():
     # ANÁLISE DO SLAM
     # --------------------------------------------------------
 
-    print("\nReconstruindo trajetória SLAM...")
+    print(f"\nReconstruindo trajetória SLAM ({args.metodo})...")
 
     slam = reconstruir_slam(
         dados["tf"]
@@ -1340,41 +1368,10 @@ def main():
     # VERIFICAÇÃO DA DURAÇÃO
     # --------------------------------------------------------
 
-    clocks = np.asarray(
-        dados["clocks"],
-        dtype=float,
-    )
+    resultados["experimento_duracao_clock_observada_s"] = duracao_observada
+    resultados["experimento_intervalo_completo"] = intervalo_completo
 
-    clocks_validos = clocks[
-        (clocks >= inicio)
-        & (clocks <= fim)
-    ]
-
-    if len(clocks_validos):
-
-        resultados[
-            "experimento_duracao_clock_observada_s"
-        ] = float(
-            np.max(clocks_validos) - inicio
-        )
-
-        resultados[
-            "experimento_intervalo_completo"
-        ] = bool(
-            np.max(clocks_validos)
-            >= fim - 0.1
-        )
-
-    else:
-
-        resultados[
-            "experimento_duracao_clock_observada_s"
-        ] = np.nan
-
-        resultados[
-            "experimento_intervalo_completo"
-        ] = False
-
+    # --------------------------------------------------------
     # --------------------------------------------------------
     # EXPORTAÇÃO
     # --------------------------------------------------------

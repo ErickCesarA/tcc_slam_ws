@@ -1,0 +1,55 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd"
+            schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>mrpt_graphslam_2d</name>
+  <version>0.1.20</version>
+  <description>
+    ROS 2 wrapper for online graphSLAM using the mrpt-graphslam library.
+    Reads measurements directly from ROS topics (single-robot mode).
+  </description>
+
+  <maintainer email="nickkouk@gmail.com">Nikos Koukis</maintainer>
+  <maintainer email="joseluisblancoc@gmail.com">Jose Luis Blanco-Claraco</maintainer>
+  <maintainer email="shravansomashekara.rai@gmail.com">Shravan S Rai</maintainer>
+
+  <license>BSD</license>
+
+  <url type="website">http://www.mrpt.org/</url>
+  <url type="website">https://wiki.ros.org/mrpt_slam</url>
+
+  <author email="nickkouk@gmail.com">Nikos Koukis</author>
+  <author email="joseluisblancoc@gmail.com">Jose Luis Blanco-Claraco</author>
+  <author email="shravansomashekara.rai@gmail.com">Shravan S Rai</author>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <!-- ROS 2 dependencies -->
+  <depend>rclcpp</depend>
+  <depend>ament_index_cpp</depend>
+  <depend>tf2</depend>
+  <depend>tf2_ros</depend>
+  <depend>tf2_geometry_msgs</depend>
+  <depend>std_msgs</depend>
+  <depend>nav_msgs</depend>
+  <depend>sensor_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>visualization_msgs</depend>
+  <depend>mrpt_msgs</depend>
+  <depend>mrpt_msgs_bridge</depend>
+
+  <!-- MRPT dependencies -->
+  <depend>mrpt_libros_bridge</depend>
+
+  <!-- Test dependencies -->
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
+  <test_depend>ament_cmake_pytest</test_depend>
+  <test_depend>python3-pytest</test_depend>
+
+  <!-- TODO TICKET-004: fkie_multimaster_msgs removed — no ROS 2 equivalent -->
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

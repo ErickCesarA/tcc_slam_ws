@@ -1,0 +1,353 @@
+import os
+import sys
+
+from launch import LaunchDescription
+
+from launch.actions import (
+    IncludeLaunchDescription,
+    DeclareLaunchArgument,
+    ExecuteProcess,
+    RegisterEventHandler,
+    LogInfo,
+    EmitEvent,
+    OpaqueFunction,
+)
+
+from launch.event_handlers import OnProcessExit
+from launch.events import Shutdown
+
+from launch.conditions import IfCondition
+
+from launch.launch_description_sources import (
+    PythonLaunchDescriptionSource,
+)
+
+from launch.substitutions import (
+    LaunchConfiguration,
+    PathJoinSubstitution,
+)
+
+from launch_ros.actions import Node
+from launch_ros.substitutions import FindPackageShare
+
+from ament_index_python.packages import (
+    get_package_share_directory,
+)
+
+
+def generate_launch_description():
+
+    # ============================================================
+    # 1. CONFIGURACOES
+    # ============================================================
+
+    use_sim_time = LaunchConfiguration("use_sim_time")
+
+    start_simulation = LaunchConfiguration("start_simulation")
+
+    bootstrap_graphslam = LaunchConfiguration(
+        "bootstrap_graphslam"
+    )
+
+    bringup_share = get_package_share_directory(
+        "tcc_slam_bringup"
+    )
+
+    monitor_file = os.path.join(
+        bringup_share,
+        "launch",
+        "readiness_monitor.py",
+    )
+
+    # Script de inicializacao do GraphSLAM
+    #
+    # Utiliza o caminho atual do workspace do TCC.
+    # Futuramente pode ser instalado no share do pacote.
+
+    bootstrap_file = os.path.expanduser(
+        "~/tcc_slam_ws/src/tcc_slam_bringup/"
+        "scripts/bootstrap_graphslam.py"
+    )
+
+    nav2_params = PathJoinSubstitution([
+        FindPackageShare("tcc_slam_bringup"),
+        "config",
+        "nav2_params.yaml",
+    ])
+
+    # ============================================================
+    # 2. SIMULACAO
+    # ============================================================
+
+    simulation_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            PathJoinSubstitution([
+                FindPackageShare("tcc_slam_bringup"),
+                "launch",
+                "simulation.launch.py",
+            ])
+        ),
+        condition=IfCondition(start_simulation),
+    )
+
+    # ============================================================
+    # 3. BOOTSTRAP GRAPHSLAM
+    # ============================================================
+
+    bootstrap_process = ExecuteProcess(
+        cmd=[
+            sys.executable,
+            bootstrap_file,
+        ],
+        output="screen",
+        name="bootstrap_graphslam",
+    )
+
+    # ============================================================
+    # 4. MONITOR PRE-NAV2
+    # ============================================================
+
+    pre_nav_monitor = ExecuteProcess(
+        cmd=[
+            sys.executable,
+            monitor_file,
+            "--mode",
+            "pre_nav",
+        ],
+        output="screen",
+        name="readiness_monitor_pre_nav",
+    )
+
+    # ============================================================
+    # 5. SERVIDORES NAV2
+    # ============================================================
+
+    navigation_launch = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(
+            PathJoinSubstitution([
+                FindPackageShare("nav2_bringup"),
+                "launch",
+                "navigation_launch.py",
+            ])
+        ),
+        launch_arguments={
+            "use_sim_time": use_sim_time,
+            "params_file": nav2_params,
+            "autostart": "False",
+        }.items(),
+    )
+
+    # ============================================================
+    # 6. LIFECYCLE MANAGER
+    # ============================================================
+
+    lifecycle_manager = Node(
+        package="nav2_lifecycle_manager",
+        executable="lifecycle_manager",
+        name="lifecycle_manager_navigation",
+        output="screen",
+        parameters=[{
+            "use_sim_time": use_sim_time,
+            "autostart": True,
+            "node_names": [
+                "controller_server",
+                "smoother_server",
+                "planner_server",
+                "route_server",
+                "behavior_server",
+                "velocity_smoother",
+                "collision_monitor",
+                "bt_navigator",
+                "waypoint_follower",
+            ],
+        }],
+    )
+
+    # ============================================================
+    # 7. CALLBACK: FINALIZACAO DO BOOTSTRAP
+    # ============================================================
+
+    def apos_bootstrap(event, context):
+
+        # O script deve retornar codigo 0 em caso de sucesso.
+        # Qualquer outro codigo interrompe a inicializacao.
+
+        if event.returncode != 0:
+
+            return [
+                LogInfo(
+                    msg=(
+                        "ERRO: Bootstrap GraphSLAM falhou. "
+                        "Nav2 nao sera iniciado."
+                    )
+                ),
+
+                EmitEvent(
+                    event=Shutdown(
+                        reason="Falha no bootstrap GraphSLAM."
+                    )
+                ),
+            ]
+
+        return [
+            LogInfo(
+                msg=(
+                    "Bootstrap GraphSLAM concluido. "
+                    "Fronteira encontrada e robo parado."
+                )
+            ),
+
+            LogInfo(
+                msg="Iniciando monitor pre-Nav2..."
+            ),
+
+            pre_nav_monitor,
+        ]
+
+    bootstrap_handler = RegisterEventHandler(
+        OnProcessExit(
+            target_action=bootstrap_process,
+            on_exit=apos_bootstrap,
+        )
+    )
+
+    # ============================================================
+    # 8. CALLBACK: FINALIZACAO DO MONITOR PRE-NAV2
+    # ============================================================
+
+    def apos_monitor_pre_nav(event, context):
+
+        if event.returncode != 0:
+
+            return [
+                LogInfo(
+                    msg=(
+                        "ERRO: Monitor pre-Nav2 falhou. "
+                        "Inicializacao interrompida."
+                    )
+                ),
+
+                EmitEvent(
+                    event=Shutdown(
+                        reason="Monitor pre-Nav2 terminou com erro."
+                    )
+                ),
+            ]
+
+        return [
+            LogInfo(
+                msg=(
+                    "Mapa, relogio e TF verificados. "
+                    "Iniciando Nav2..."
+                )
+            ),
+
+            navigation_launch,
+
+            lifecycle_manager,
+        ]
+
+    monitor_handler = RegisterEventHandler(
+        OnProcessExit(
+            target_action=pre_nav_monitor,
+            on_exit=apos_monitor_pre_nav,
+        )
+    )
+
+    # ============================================================
+    # 9. SELECAO DO FLUXO DE INICIALIZACAO
+    # ============================================================
+
+    def selecionar_inicializacao(context):
+
+        usar_bootstrap = bootstrap_graphslam.perform(
+            context
+        ).strip().lower() in (
+            "true",
+            "1",
+            "yes",
+            "on",
+        )
+
+        if usar_bootstrap:
+
+            return [
+                LogInfo(
+                    msg=(
+                        "Modo GraphSLAM selecionado. "
+                        "Iniciando movimentacao preliminar..."
+                    )
+                ),
+
+                bootstrap_process,
+            ]
+
+        return [
+            LogInfo(
+                msg=(
+                    "Bootstrap desativado. "
+                    "Iniciando fluxo normal do Nav2..."
+                )
+            ),
+
+            pre_nav_monitor,
+        ]
+
+    iniciar_fluxo = OpaqueFunction(
+        function=selecionar_inicializacao
+    )
+
+    # ============================================================
+    # 10. LAUNCH DESCRIPTION
+    # ============================================================
+
+    return LaunchDescription([
+
+        # --------------------------------------------------------
+        # Argumentos
+        # --------------------------------------------------------
+
+        DeclareLaunchArgument(
+            "use_sim_time",
+            default_value="true",
+            description="Utilizar relogio da simulacao",
+        ),
+
+        DeclareLaunchArgument(
+            "start_simulation",
+            default_value="true",
+            description=(
+                "Iniciar Gazebo e os componentes da simulacao"
+            ),
+        ),
+
+        DeclareLaunchArgument(
+            "bootstrap_graphslam",
+            default_value="false",
+            description=(
+                "Executar movimentacao inicial automatica "
+                "antes da inicializacao do Nav2"
+            ),
+        ),
+
+        # --------------------------------------------------------
+        # Registrar eventos
+        # --------------------------------------------------------
+
+        bootstrap_handler,
+
+        monitor_handler,
+
+        # --------------------------------------------------------
+        # Iniciar simulacao, caso solicitada
+        # --------------------------------------------------------
+
+        simulation_launch,
+
+        # --------------------------------------------------------
+        # Selecionar bootstrap ou fluxo normal
+        # --------------------------------------------------------
+
+        iniciar_fluxo,
+
+    ])

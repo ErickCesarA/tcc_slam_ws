@@ -1,0 +1,43 @@
+[INFO] [1794320634.756630762] [ekf_map_builder]: EKF Map Builder iniciado.
+[INFO] [1794320645.171370572] [ekf_map_builder]: Mapa publicado. Scans integrados: 20
+[INFO] [1794320655.171359375] [ekf_map_builder]: Mapa publicado. Scans integrados: 40
+[INFO] [1794320665.171617436] [ekf_map_builder]: Mapa publicado. Scans integrados: 60
+[INFO] [1794320675.201757149] [ekf_map_builder]: Mapa publicado. Scans integrados: 80
+[INFO] [1794320685.202197744] [ekf_map_builder]: Mapa publicado. Scans integrados: 100
+[INFO] [1794320695.202431996] [ekf_map_builder]: Mapa publicado. Scans integrados: 120
+[INFO] [1794320705.202227582] [ekf_map_builder]: Mapa publicado. Scans integrados: 140
+[INFO] [1794320715.202105597] [ekf_map_builder]: Mapa publicado. Scans integrados: 160
+[INFO] [1794320725.202280426] [ekf_map_builder]: Mapa publicado. Scans integrados: 180
+[INFO] [1794320735.202289505] [ekf_map_builder]: Mapa publicado. Scans integrados: 200
+[INFO] [1794320745.202568525] [ekf_map_builder]: Mapa publicado. Scans integrados: 220
+[INFO] [1794320755.202355944] [ekf_map_builder]: Mapa publicado. Scans integrados: 240
+[INFO] [1794320765.203438791] [ekf_map_builder]: Mapa publicado. Scans integrados: 260
+[INFO] [1794320775.204334066] [ekf_map_builder]: Mapa publicado. Scans integrados: 280
+[INFO] [1794320785.203355284] [ekf_map_builder]: Mapa publicado. Scans integrados: 300
+[INFO] [1794320795.203557297] [ekf_map_builder]: Mapa publicado. Scans integrados: 320
+[INFO] [1794320805.203448311] [ekf_map_builder]: Mapa publicado. Scans integrados: 340
+[INFO] [1794320815.203361302] [ekf_map_builder]: Mapa publicado. Scans integrados: 360
+[INFO] [1794320825.204429300] [ekf_map_builder]: Mapa publicado. Scans integrados: 380
+Traceback (most recent call last):
+  File "/home/erick/tcc_slam_ws/src/tcc_slam_bringup/scripts/ekf_map_builder.py", line 411, in <module>
+    main()
+    ~~~~^^
+  File "/home/erick/tcc_slam_ws/src/tcc_slam_bringup/scripts/ekf_map_builder.py", line 398, in main
+    rclpy.spin(node)
+    ~~~~~~~~~~^^^^^^
+  File "/opt/ros/lyrical/lib/python3.14/site-packages/rclpy/__init__.py", line 324, in spin
+    executor.spin_once()
+    ~~~~~~~~~~~~~~~~~~^^
+  File "/opt/ros/lyrical/lib/python3.14/site-packages/rclpy/executors.py", line 1033, in spin_once
+    self._spin_once_impl(timeout_sec)
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "/opt/ros/lyrical/lib/python3.14/site-packages/rclpy/executors.py", line 1013, in _spin_once_impl
+    handler, entity, node = self.wait_for_ready_callbacks(
+                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        timeout_sec, None, wait_condition)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/ros/lyrical/lib/python3.14/site-packages/rclpy/executors.py", line 983, in wait_for_ready_callbacks
+    return next(self._cb_iter)
+  File "/opt/ros/lyrical/lib/python3.14/site-packages/rclpy/executors.py", line 889, in _wait_for_ready_callbacks
+    raise ExternalShutdownException()
+rclpy.executors.ExternalShutdownException

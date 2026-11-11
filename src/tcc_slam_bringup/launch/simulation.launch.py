@@ -295,7 +295,7 @@ def generate_launch_description():
             LogInfo(
                 msg="Sensores e TF disponíveis. Iniciando SLAM..."
             ),
-            slam_launch,
+            #slam_launch,
             rviz,
         ]
 

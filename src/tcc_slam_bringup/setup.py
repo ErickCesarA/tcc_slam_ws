@@ -31,6 +31,18 @@ setup(
             'share/' + package_name + '/launch',
             ['launch/readiness_monitor.py'],
         ),
+        (
+            os.path.join('share', package_name, 'scripts'),
+            [
+                'scripts/bootstrap_graphslam.py',
+                'scripts/landmark_detector.py',
+                'scripts/ekf_map_builder.py',
+            ],
+        ),
+        (
+            os.path.join('share', package_name, 'config', 'mrpt'),
+            glob('config/mrpt/*.ini') + glob('config/mrpt/*.yaml'),
+        ),
     ],
     install_requires=["setuptools"],
     zip_safe=True,

@@ -197,11 +197,14 @@ def aguardar_nav2(node, timeout=120):
     return False
 
 
-def executar(numero, duracao):
+def executar(numero, duracao, metodo):
 
     workspace = Path.home() / "tcc_slam_ws"
 
     identificador = f"{numero:03d}"
+
+    print(f"Metodo de SLAM informado: {metodo}")
+    print(f"Duracao planejada: {duracao:g} s simulados")
 
     pasta = (
         workspace
@@ -262,6 +265,17 @@ def executar(numero, duracao):
 
         print("Relógio recebido.")
 
+        # Metadata explicita; o rosbag por si so nao informa com seguranca
+        # qual metodo estava ativo.
+        (pasta.parent / "manifest.json").write_text(
+            json.dumps({
+                "experimento": identificador,
+                "slam_method": metodo,
+                "duracao_configurada_s": duracao,
+            }, ensure_ascii=False, indent=2) + "\n",
+            encoding="utf-8",
+        )
+
         arquivo_log = open(
             pasta / "gravacao.log",
             "w",
@@ -285,7 +299,7 @@ def executar(numero, duracao):
         )
 
         # Intervalo apenas para inicialização do gravador.
-        # Não faz parte dos 600 segundos experimentais.
+        # Não faz parte da duração experimental configurada.
         time.sleep(3)
 
         if gravador.poll() is not None:
@@ -421,6 +435,8 @@ def executar(numero, duracao):
                 / "analisar_experimento.sh"
             ),
             str(numero),
+            str(duracao),
+            metodo,
         ],
         check=True,
     )
@@ -437,6 +453,13 @@ def main():
     parser.add_argument(
         "numero",
         type=int,
+    )
+
+    parser.add_argument(
+        "--metodo",
+        choices=["toolbox", "graph", "rbpf", "ekf"],
+        required=True,
+        help="Metodo SLAM ativo no navigation.launch.py",
     )
 
     parser.add_argument(
@@ -460,6 +483,7 @@ def main():
     executar(
         args.numero,
         args.duracao,
+        args.metodo,
     )
 
 

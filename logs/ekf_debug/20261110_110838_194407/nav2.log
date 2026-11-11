@@ -1,0 +1,597 @@
+[INFO] [launch]: All log files can be found below /home/erick/.ros/log/2026-11-10-11-08-44-927461-erick-pc-194602
+[INFO] [launch]: Default logging verbosity is set to INFO
+[INFO] [launch.user]: Bootstrap desativado. Iniciando fluxo normal do Nav2...
+[INFO] [readiness_monitor_pre_nav-1]: process started with pid [194618]
+[readiness_monitor_pre_nav-1] [INFO] [1794319725.457281121] [readiness_monitor_pre_nav]: Monitor iniciado: pre_nav
+[readiness_monitor_pre_nav-1] [INFO] [1794319726.451872799] [readiness_monitor_pre_nav]: Aguardando: clock
+[readiness_monitor_pre_nav-1] [INFO] [1794319727.451780025] [readiness_monitor_pre_nav]: Aguardando: clock
+[readiness_monitor_pre_nav-1] [INFO] [1794319728.451778823] [readiness_monitor_pre_nav]: Aguardando: clock
+[readiness_monitor_pre_nav-1] [INFO] [1794319729.451871847] [readiness_monitor_pre_nav]: Aguardando: clock
+[readiness_monitor_pre_nav-1] [INFO] [1794319730.451812007] [readiness_monitor_pre_nav]: Todas as condições foram atendidas.
+[INFO] [readiness_monitor_pre_nav-1]: process has finished cleanly [pid 194618]
+[INFO] [launch.user]: Mapa, relogio e TF verificados. Iniciando Nav2...
+[INFO] [controller_server-2]: process started with pid [195225]
+[INFO] [smoother_server-3]: process started with pid [195226]
+[INFO] [planner_server-4]: process started with pid [195227]
+[INFO] [route_server-5]: process started with pid [195228]
+[INFO] [behavior_server-6]: process started with pid [195229]
+[INFO] [bt_navigator-7]: process started with pid [195230]
+[INFO] [waypoint_follower-8]: process started with pid [195231]
+[INFO] [velocity_smoother-9]: process started with pid [195232]
+[INFO] [collision_monitor-10]: process started with pid [195233]
+[INFO] [opennav_docking-11]: process started with pid [195234]
+[INFO] [opennav_following-12]: process started with pid [195235]
+[INFO] [lifecycle_manager-13]: process started with pid [195236]
+[velocity_smoother-9] [INFO] [1794319730.753782631] [velocity_smoother]: 
+[velocity_smoother-9] 	velocity_smoother lifecycle node launched. 
+[velocity_smoother-9] 	Waiting on external lifecycle transitions to activate
+[velocity_smoother-9] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[waypoint_follower-8] [INFO] [1794319730.757073132] [waypoint_follower]: 
+[waypoint_follower-8] 	waypoint_follower lifecycle node launched. 
+[waypoint_follower-8] 	Waiting on external lifecycle transitions to activate
+[waypoint_follower-8] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[waypoint_follower-8] [INFO] [1794319730.758691158] [waypoint_follower]: Creating
+[behavior_server-6] [INFO] [1794319730.779880792] [behavior_server]: 
+[behavior_server-6] 	behavior_server lifecycle node launched. 
+[behavior_server-6] 	Waiting on external lifecycle transitions to activate
+[behavior_server-6] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[opennav_following-12] [INFO] [1794319730.787622927] [following_server]: 
+[opennav_following-12] 	following_server lifecycle node launched. 
+[opennav_following-12] 	Waiting on external lifecycle transitions to activate
+[opennav_following-12] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[opennav_following-12] [INFO] [1794319730.788050370] [following_server]: Creating following_server
+[collision_monitor-10] [INFO] [1794319730.794709899] [collision_monitor]: 
+[collision_monitor-10] 	collision_monitor lifecycle node launched. 
+[collision_monitor-10] 	Waiting on external lifecycle transitions to activate
+[collision_monitor-10] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[controller_server-2] [INFO] [1794319730.796436080] [controller_server]: 
+[controller_server-2] 	controller_server lifecycle node launched. 
+[controller_server-2] 	Waiting on external lifecycle transitions to activate
+[controller_server-2] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[route_server-5] [INFO] [1794319730.796738786] [route_server]: 
+[route_server-5] 	route_server lifecycle node launched. 
+[route_server-5] 	Waiting on external lifecycle transitions to activate
+[route_server-5] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[lifecycle_manager-13] [INFO] [1794319730.797164038] [lifecycle_manager_navigation]: Creating
+[lifecycle_manager-13] [INFO] [1794319730.797418114] [lifecycle_manager_navigation]: [34m[1mCreating and initializing lifecycle publishers[0m[0m
+[lifecycle_manager-13] [INFO] [1794319730.798409150] [lifecycle_manager_navigation]: [34m[1mCreating and initializing lifecycle service clients[0m[0m
+[bt_navigator-7] [INFO] [1794319730.799418895] [bt_navigator]: 
+[bt_navigator-7] 	bt_navigator lifecycle node launched. 
+[bt_navigator-7] 	Waiting on external lifecycle transitions to activate
+[bt_navigator-7] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[bt_navigator-7] [INFO] [1794319730.800608805] [bt_navigator]: Creating
+[controller_server-2] [INFO] [1794319730.802561808] [controller_server]: Creating controller server
+[opennav_docking-11] [INFO] [1794319730.803046294] [docking_server]: 
+[opennav_docking-11] 	docking_server lifecycle node launched. 
+[opennav_docking-11] 	Waiting on external lifecycle transitions to activate
+[opennav_docking-11] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[planner_server-4] [INFO] [1794319730.803085539] [planner_server]: 
+[planner_server-4] 	planner_server lifecycle node launched. 
+[planner_server-4] 	Waiting on external lifecycle transitions to activate
+[planner_server-4] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[opennav_docking-11] [INFO] [1794319730.803125566] [docking_server]: Creating docking_server
+[planner_server-4] [INFO] [1794319730.804344492] [planner_server]: Creating
+[controller_server-2] [INFO] [1794319730.812453211] [local_costmap.local_costmap]: 
+[controller_server-2] 	local_costmap lifecycle node launched. 
+[controller_server-2] 	Waiting on external lifecycle transitions to activate
+[controller_server-2] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[controller_server-2] [INFO] [1794319730.812808716] [local_costmap.local_costmap]: Creating Costmap
+[planner_server-4] [INFO] [1794319730.814644604] [global_costmap.global_costmap]: 
+[planner_server-4] 	global_costmap lifecycle node launched. 
+[planner_server-4] 	Waiting on external lifecycle transitions to activate
+[planner_server-4] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[planner_server-4] [INFO] [1794319730.815030790] [global_costmap.global_costmap]: Creating Costmap
+[smoother_server-3] [INFO] [1794319730.815549131] [smoother_server]: 
+[smoother_server-3] 	smoother_server lifecycle node launched. 
+[smoother_server-3] 	Waiting on external lifecycle transitions to activate
+[smoother_server-3] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[smoother_server-3] [INFO] [1794319730.816670194] [smoother_server]: Creating smoother server
+[lifecycle_manager-13] [INFO] [1794319731.987515297] [lifecycle_manager_navigation]: [34m[1mCreating and initializing lifecycle service servers[0m[0m
+[lifecycle_manager-13] [INFO] [1794319731.998141358] [lifecycle_manager_navigation]: [34m[1mStarting managed nodes bringup...[0m[0m
+[lifecycle_manager-13] [INFO] [1794319731.998174033] [lifecycle_manager_navigation]: [34m[1mConfiguring controller_server[0m[0m
+[controller_server-2] [INFO] [1794319731.998700052] [controller_server]: Configuring controller interface
+[controller_server-2] [INFO] [1794319731.998793895] [local_costmap.local_costmap]: Configuring
+[controller_server-2] [INFO] [1794319732.009911403] [local_costmap.local_costmap]: Using plugin "obstacle_layer"
+[controller_server-2] [INFO] [1794319732.012795110] [local_costmap.local_costmap]: Subscribed to Topics: scan
+[controller_server-2] [INFO] [1794319732.015436300] [local_costmap.local_costmap]: Initialized plugin "obstacle_layer"
+[controller_server-2] [INFO] [1794319732.015467975] [local_costmap.local_costmap]: Using plugin "inflation_layer"
+[controller_server-2] [INFO] [1794319732.015645832] [local_costmap.local_costmap]: Initialized plugin "inflation_layer"
+[controller_server-2] [INFO] [1794319732.054606328] [controller_server]: Controller frequency set to 20.0000Hz
+[controller_server-2] [INFO] [1794319732.054646636] [controller_server]: getting progress checker plugins..
+[controller_server-2] [INFO] [1794319732.054682970] [controller_server]: getting goal checker plugins..
+[controller_server-2] [INFO] [1794319732.054702745] [controller_server]: getting controller plugins..
+[controller_server-2] [INFO] [1794319732.054721944] [controller_server]: getting path handler plugins..
+[controller_server-2] [INFO] [1794319732.055611113] [controller_server]: Created progress_checker : progress_checker of type nav2_controller::SimpleProgressChecker
+[controller_server-2] [INFO] [1794319732.055648268] [controller_server]: Controller Server has progress_checker  progress checkers available.
+[controller_server-2] [INFO] [1794319732.056693527] [controller_server]: Created goal checker : goal_checker of type nav2_controller::SimpleGoalChecker
+[controller_server-2] [INFO] [1794319732.056716299] [controller_server]: Controller Server has goal_checker  goal checkers available.
+[controller_server-2] [INFO] [1794319732.057257986] [controller_server]: Created path handler : PathHandler of type nav2_controller::FeasiblePathHandler
+[controller_server-2] [INFO] [1794319732.057277458] [controller_server]: Controller Server has PathHandler  path handlers available.
+[controller_server-2] [INFO] [1794319732.058738237] [controller_server]: Created controller : FollowPath of type nav2_mppi_controller::MPPIController
+[controller_server-2] [INFO] [1794319732.063082049] [controller_server]: Loaded motion model plugin: mppi::DiffDriveMotionModel
+[controller_server-2] [INFO] [1794319732.063126779] [controller_server]: Controller period is equal to model dt. Control sequence shifting is ON
+[controller_server-2] [INFO] [1794319732.064572174] [controller_server]: ConstraintCritic instantiated with 1 power and 4.000000 weight.
+[controller_server-2] [INFO] [1794319732.064697527] [controller_server]: Critic loaded : mppi::critics::ConstraintCritic
+[controller_server-2] [INFO] [1794319732.064855339] [controller_server]: InflationCostCritic instantiated with 1 power and 300.000000 / 0.015000 weights. Critic will collision check based on footprint cost.
+[controller_server-2] [INFO] [1794319732.064868454] [controller_server]: Critic loaded : mppi::critics::CostCritic
+[controller_server-2] [INFO] [1794319732.065049549] [controller_server]: GoalCritic instantiated with 1 power and 5.000000 weight.
+[controller_server-2] [INFO] [1794319732.065058042] [controller_server]: Critic loaded : mppi::critics::GoalCritic
+[controller_server-2] [INFO] [1794319732.065100431] [controller_server]: GoalAngleCritic instantiated with 1 power, 3.000000 weight, 0.500000 angular threshold and symmetric_yaw_tolerance disabled
+[controller_server-2] [INFO] [1794319732.065106605] [controller_server]: Critic loaded : mppi::critics::GoalAngleCritic
+[controller_server-2] [INFO] [1794319732.065187722] [controller_server]: ReferenceTrajectoryCritic instantiated with 1 power and 10.000000 weight
+[controller_server-2] [INFO] [1794319732.065193126] [controller_server]: Critic loaded : mppi::critics::PathAlignCritic
+[controller_server-2] [INFO] [1794319732.065380787] [controller_server]: Critic loaded : mppi::critics::PathFollowCritic
+[controller_server-2] [INFO] [1794319732.065464919] [controller_server]: PathAngleCritic instantiated with 1 power and 2.000000 weight. Mode set to: Forward Preference
+[controller_server-2] [INFO] [1794319732.065502758] [controller_server]: Critic loaded : mppi::critics::PathAngleCritic
+[controller_server-2] [INFO] [1794319732.065559368] [controller_server]: PreferForwardCritic instantiated with 1 power and 5.000000 weight.
+[controller_server-2] [INFO] [1794319732.065565362] [controller_server]: Critic loaded : mppi::critics::PreferForwardCritic
+[controller_server-2] [INFO] [1794319732.068819492] [controller_server]: Loaded trajectory validator plugin: mppi::DefaultOptimalTrajectoryValidator
+[controller_server-2] [INFO] [1794319732.070596198] [controller_server]: Optimizer reset
+[controller_server-2] [INFO] [1794319732.075288962] [MPPIController]: Configured MPPI Controller: FollowPath
+[controller_server-2] [INFO] [1794319732.075316022] [controller_server]: Controller Server has FollowPath  controllers available.
+[lifecycle_manager-13] [INFO] [1794319732.094179871] [lifecycle_manager_navigation]: [34m[1mConfiguring smoother_server[0m[0m
+[smoother_server-3] [INFO] [1794319732.094999896] [smoother_server]: Configuring smoother server
+[smoother_server-3] [INFO] [1794319732.117048887] [smoother_server]: Created smoother : simple_smoother of type nav2_smoother::SimpleSmoother
+[smoother_server-3] [INFO] [1794319732.117186459] [smoother_server]: Smoother Server has simple_smoother  smoothers available.
+[lifecycle_manager-13] [INFO] [1794319732.128734204] [lifecycle_manager_navigation]: [34m[1mConfiguring planner_server[0m[0m
+[planner_server-4] [INFO] [1794319732.131164124] [planner_server]: Configuring
+[planner_server-4] [INFO] [1794319732.131204987] [global_costmap.global_costmap]: Configuring
+[planner_server-4] [INFO] [1794319732.144030408] [global_costmap.global_costmap]: Using plugin "static_layer"
+[planner_server-4] [INFO] [1794319732.147092909] [global_costmap.global_costmap]: Subscribing to the map topic (/map) with transient local durability
+[planner_server-4] [INFO] [1794319732.149269425] [global_costmap.global_costmap]: Initialized plugin "static_layer"
+[planner_server-4] [INFO] [1794319732.149292872] [global_costmap.global_costmap]: Using plugin "obstacle_layer"
+[planner_server-4] [INFO] [1794319732.149396120] [global_costmap.global_costmap]: Subscribed to Topics: scan
+[planner_server-4] [INFO] [1794319732.152766027] [global_costmap.global_costmap]: Initialized plugin "obstacle_layer"
+[planner_server-4] [INFO] [1794319732.152803154] [global_costmap.global_costmap]: Using plugin "inflation_layer"
+[planner_server-4] [INFO] [1794319732.152963644] [global_costmap.global_costmap]: Initialized plugin "inflation_layer"
+[planner_server-4] [INFO] [1794319732.181972899] [planner_server]: Created global planner plugin GridBased of type nav2_navfn_planner::NavfnPlanner
+[planner_server-4] [INFO] [1794319732.182008254] [planner_server]: Configuring plugin GridBased of type NavfnPlanner
+[planner_server-4] [INFO] [1794319732.182140046] [planner_server]: Planner Server has GridBased  planners available.
+[planner_server-4] [INFO] [1794319732.182323728] [global_costmap.global_costmap]: StaticLayer: Resizing costmap to 400 X 400 at 0.050000 m/pix
+[planner_server-4] [WARN] [1794319732.182347151] [global_costmap.global_costmap]: StaticLayer: Costmap origin coordinates are not perfectly aligned with the resolution. This may cause misalignment aliasing between rolling and non-rolling costmaps.
+[planner_server-4] Map origin: (-10, -10) | Resolution: 0
+[lifecycle_manager-13] [INFO] [1794319732.211034277] [lifecycle_manager_navigation]: [34m[1mConfiguring route_server[0m[0m
+[route_server-5] [INFO] [1794319732.212299830] [route_server]: Configuring
+[route_server-5] [INFO] [1794319732.262630785] [route_server]: Created GraphFileLoader GeoJsonGraphFileLoader of type nav2_route::GeoJsonGraphFileLoader
+[route_server-5] [INFO] [1794319732.262669291] [route_server]: Configuring geojson graph file loader
+[route_server-5] [INFO] [1794319732.262676527] [route_server]: No graph file provided to load yet.
+[route_server-5] [INFO] [1794319732.267342388] [route_server]: Created edge cost function plugin DistanceScorer of type nav2_route::DistanceScorer
+[route_server-5] [INFO] [1794319732.267377863] [route_server]: Configuring distance scorer.
+[route_server-5] [INFO] [1794319732.268256706] [route_server]: Created edge cost function plugin DynamicEdgesScorer of type nav2_route::DynamicEdgesScorer
+[route_server-5] [INFO] [1794319732.268312157] [route_server]: Configuring adjust edges scorer.
+[route_server-5] [INFO] [1794319732.276962697] [route_server]: Created route operation AdjustSpeedLimit of type nav2_route::AdjustSpeedLimit
+[route_server-5] [INFO] [1794319732.277008285] [route_server]: Configuring Adjust speed limit operation.
+[route_server-5] [INFO] [1794319732.279457609] [route_server]: Created route operation ReroutingService of type nav2_route::ReroutingService
+[route_server-5] [INFO] [1794319732.279489393] [route_server]: Configuring Rerouting service operation.
+[lifecycle_manager-13] [INFO] [1794319732.282879287] [lifecycle_manager_navigation]: [34m[1mConfiguring behavior_server[0m[0m
+[behavior_server-6] [INFO] [1794319732.283124036] [behavior_server]: Configuring
+[behavior_server-6] [INFO] [1794319732.288214553] [behavior_server]: Creating behavior plugin spin of type nav2_behaviors::Spin
+[behavior_server-6] [INFO] [1794319732.289354022] [behavior_server]: Creating behavior plugin backup of type nav2_behaviors::BackUp
+[behavior_server-6] [INFO] [1794319732.290242409] [behavior_server]: Creating behavior plugin drive_on_heading of type nav2_behaviors::DriveOnHeading
+[behavior_server-6] [INFO] [1794319732.291053823] [behavior_server]: Creating behavior plugin wait of type nav2_behaviors::Wait
+[behavior_server-6] [INFO] [1794319732.303899498] [behavior_server]: Configuring spin
+[behavior_server-6] [INFO] [1794319732.316694824] [behavior_server]: Configuring backup
+[behavior_server-6] [INFO] [1794319732.328355863] [behavior_server]: Configuring drive_on_heading
+[behavior_server-6] [INFO] [1794319732.337028808] [behavior_server]: Configuring wait
+[lifecycle_manager-13] [INFO] [1794319732.355691868] [lifecycle_manager_navigation]: [34m[1mConfiguring velocity_smoother[0m[0m
+[velocity_smoother-9] [INFO] [1794319732.356470756] [velocity_smoother]: Configuring velocity smoother
+[lifecycle_manager-13] [INFO] [1794319732.362288895] [lifecycle_manager_navigation]: [34m[1mConfiguring collision_monitor[0m[0m
+[collision_monitor-10] [INFO] [1794319732.362462736] [collision_monitor]: Configuring
+[collision_monitor-10] [INFO] [1794319732.366577121] [collision_monitor]: [scan]: Creating Scan
+[collision_monitor-10] [INFO] [1794319732.380321848] [collision_monitor]: [FootprintApproach]: Creating Polygon
+[collision_monitor-10] [INFO] [1794319732.380409114] [collision_monitor]: [FootprintApproach]: Polygon points are not defined. Using dynamic subscription instead.
+[collision_monitor-10] [INFO] [1794319732.380542945] [collision_monitor]: [FootprintApproach]: Making footprint subscriber on local_costmap/published_footprint topic
+[collision_monitor-10] [INFO] [1794319732.391000519] [collision_monitor]: Collision monitor is enabled at startup.
+[lifecycle_manager-13] [INFO] [1794319732.392597728] [lifecycle_manager_navigation]: [34m[1mConfiguring bt_navigator[0m[0m
+[bt_navigator-7] [INFO] [1794319732.393314259] [bt_navigator]: Configuring
+[bt_navigator-7] [INFO] [1794319732.399920967] [bt_navigator]: Creating navigator id navigate_to_pose of type nav2_bt_navigator::NavigateToPoseNavigator
+[bt_navigator-7] [WARN] [1794319732.403470463] [bt_navigator]: error_code_name_prefixes parameters were not set. Using default values of: assisted_teleop backup compute_path dock_robot drive_on_heading follow_object follow_path nav_thru_poses nav_to_pose spin undock_robot wait
+[bt_navigator-7] Make sure these match your BT and there are not other sources of error codes youreported to your application
+[bt_navigator-7] [INFO] [1794319732.416099727] [bt_navigator_navigate_to_pose_rclcpp_node]: 
+[bt_navigator-7] 	bt_navigator_navigate_to_pose_rclcpp_node lifecycle node launched. 
+[bt_navigator-7] 	Waiting on external lifecycle transitions to activate
+[bt_navigator-7] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[bt_navigator-7] [INFO] [1794319732.476396636] [bt_navigator]: Creating navigator id navigate_through_poses of type nav2_bt_navigator::NavigateThroughPosesNavigator
+[bt_navigator-7] [WARN] [1794319732.477848574] [bt_navigator]: error_code_name_prefixes parameters were not set. Using default values of: assisted_teleop backup compute_path dock_robot drive_on_heading follow_object follow_path nav_thru_poses nav_to_pose spin undock_robot wait
+[bt_navigator-7] Make sure these match your BT and there are not other sources of error codes youreported to your application
+[bt_navigator-7] [INFO] [1794319732.492337236] [bt_navigator_navigate_through_poses_rclcpp_node]: 
+[bt_navigator-7] 	bt_navigator_navigate_through_poses_rclcpp_node lifecycle node launched. 
+[bt_navigator-7] 	Waiting on external lifecycle transitions to activate
+[bt_navigator-7] 	See https://design.ros2.org/articles/node_lifecycle.html for more information.
+[lifecycle_manager-13] [INFO] [1794319732.505287747] [lifecycle_manager_navigation]: [34m[1mConfiguring waypoint_follower[0m[0m
+[waypoint_follower-8] [INFO] [1794319732.506239317] [waypoint_follower]: Configuring
+[waypoint_follower-8] [INFO] [1794319732.548436532] [waypoint_follower]: Created waypoint_task_executor : wait_at_waypoint of type nav2_waypoint_follower::WaitAtWaypoint
+[waypoint_follower-8] [INFO] [1794319732.548537578] [waypoint_follower]: Waypoint pause duration is set to zero, disabling task executor plugin.
+[lifecycle_manager-13] [INFO] [1794319732.550248374] [lifecycle_manager_navigation]: [34m[1mActivating controller_server[0m[0m
+[controller_server-2] [INFO] [1794319732.550569370] [controller_server]: Activating
+[controller_server-2] [INFO] [1794319732.550626585] [local_costmap.local_costmap]: Activating
+[controller_server-2] [INFO] [1794319732.550634397] [local_costmap.local_costmap]: Checking transform
+[controller_server-2] [INFO] [1794319732.550765022] [local_costmap.local_costmap]: start
+[controller_server-2] [INFO] [1794319732.751740802] [MPPIController]: Activated MPPI Controller: FollowPath
+[controller_server-2] [INFO] [1794319732.751952169] [controller_server]: Creating bond (controller_server) to lifecycle manager.
+[lifecycle_manager-13] [INFO] [1794319733.009179183] [lifecycle_manager_navigation]: Server controller_server connected with bond.
+[lifecycle_manager-13] [INFO] [1794319733.009207382] [lifecycle_manager_navigation]: [34m[1mActivating smoother_server[0m[0m
+[smoother_server-3] [INFO] [1794319733.009435103] [smoother_server]: Activating
+[smoother_server-3] [INFO] [1794319733.009452877] [smoother_server]: Creating bond (smoother_server) to lifecycle manager.
+[lifecycle_manager-13] [INFO] [1794319733.264018536] [lifecycle_manager_navigation]: Server smoother_server connected with bond.
+[lifecycle_manager-13] [INFO] [1794319733.264048818] [lifecycle_manager_navigation]: [34m[1mActivating planner_server[0m[0m
+[planner_server-4] [INFO] [1794319733.264325930] [planner_server]: Activating
+[planner_server-4] [INFO] [1794319733.264361695] [global_costmap.global_costmap]: Activating
+[planner_server-4] [INFO] [1794319733.264368012] [global_costmap.global_costmap]: Checking transform
+[planner_server-4] [INFO] [1794319733.264461161] [global_costmap.global_costmap]: start
+[planner_server-4] [INFO] [1794319733.815277405] [planner_server]: Activating plugin GridBased of type NavfnPlanner
+[planner_server-4] [INFO] [1794319733.816402534] [planner_server]: Creating bond (planner_server) to lifecycle manager.
+[lifecycle_manager-13] [INFO] [1794319734.072545675] [lifecycle_manager_navigation]: Server planner_server connected with bond.
+[lifecycle_manager-13] [INFO] [1794319734.072574093] [lifecycle_manager_navigation]: [34m[1mActivating route_server[0m[0m
+[route_server-5] [INFO] [1794319734.072782675] [route_server]: Activating
+[route_server-5] [INFO] [1794319734.072895867] [route_server]: Creating bond (route_server) to lifecycle manager.
+[lifecycle_manager-13] [INFO] [1794319734.328205590] [lifecycle_manager_navigation]: Server route_server connected with bond.
+[lifecycle_manager-13] [INFO] [1794319734.328244236] [lifecycle_manager_navigation]: [34m[1mActivating behavior_server[0m[0m
+[behavior_server-6] [INFO] [1794319734.328617799] [behavior_server]: Activating
+[behavior_server-6] [INFO] [1794319734.328634842] [behavior_server]: Activating spin
+[behavior_server-6] [INFO] [1794319734.328641611] [behavior_server]: Activating backup
+[behavior_server-6] [INFO] [1794319734.328646543] [behavior_server]: Activating drive_on_heading
+[behavior_server-6] [INFO] [1794319734.328651347] [behavior_server]: Activating wait
+[behavior_server-6] [INFO] [1794319734.328656375] [behavior_server]: Creating bond (behavior_server) to lifecycle manager.
+[lifecycle_manager-13] [INFO] [1794319734.583181545] [lifecycle_manager_navigation]: Server behavior_server connected with bond.
+[lifecycle_manager-13] [INFO] [1794319734.583215795] [lifecycle_manager_navigation]: [34m[1mActivating velocity_smoother[0m[0m
+[velocity_smoother-9] [INFO] [1794319734.583468175] [velocity_smoother]: Activating
+[velocity_smoother-9] [INFO] [1794319734.583509864] [velocity_smoother]: Creating bond (velocity_smoother) to lifecycle manager.
+[lifecycle_manager-13] [INFO] [1794319734.838112955] [lifecycle_manager_navigation]: Server velocity_smoother connected with bond.
+[lifecycle_manager-13] [INFO] [1794319734.838150873] [lifecycle_manager_navigation]: [34m[1mActivating collision_monitor[0m[0m
+[collision_monitor-10] [INFO] [1794319734.838404251] [collision_monitor]: Activating
+[collision_monitor-10] [INFO] [1794319734.838431192] [collision_monitor]: Creating bond (collision_monitor) to lifecycle manager.
+[lifecycle_manager-13] [INFO] [1794319735.093343110] [lifecycle_manager_navigation]: Server collision_monitor connected with bond.
+[lifecycle_manager-13] [INFO] [1794319735.093377606] [lifecycle_manager_navigation]: [34m[1mActivating bt_navigator[0m[0m
+[bt_navigator-7] [INFO] [1794319735.093624018] [bt_navigator]: Activating
+[bt_navigator-7] [INFO] [1794319735.130655374] [bt_navigator]: Created BT from ID: NavigateToPoseWReplanningAndRecovery
+[bt_navigator-7] [INFO] [1794319735.165172639] [bt_navigator]: Created BT from ID: NavigateThroughPosesWReplanningAndRecovery
+[bt_navigator-7] [INFO] [1794319735.165951446] [bt_navigator]: Creating bond (bt_navigator) to lifecycle manager.
+[lifecycle_manager-13] [INFO] [1794319735.421033763] [lifecycle_manager_navigation]: Server bt_navigator connected with bond.
+[lifecycle_manager-13] [INFO] [1794319735.421102306] [lifecycle_manager_navigation]: [34m[1mActivating waypoint_follower[0m[0m
+[waypoint_follower-8] [INFO] [1794319735.421431122] [waypoint_follower]: Activating
+[waypoint_follower-8] [INFO] [1794319735.421447939] [waypoint_follower]: Creating bond (waypoint_follower) to lifecycle manager.
+[lifecycle_manager-13] [INFO] [1794319735.676937011] [lifecycle_manager_navigation]: Server waypoint_follower connected with bond.
+[lifecycle_manager-13] [INFO] [1794319735.677010629] [lifecycle_manager_navigation]: [34m[1mManaged nodes are active[0m[0m
+[lifecycle_manager-13] [INFO] [1794319735.677024729] [lifecycle_manager_navigation]: [34m[1mCreating bond timer...[0m[0m
+[bt_navigator-7] [INFO] [1794320050.869722616] [bt_navigator]: Begin navigating from current location (-0.00, 0.00) to (2.78, -2.27)
+[planner_server-4] [INFO] [1794320050.870953850] [planner_server]: Computing path to goal.
+[controller_server-2] [WARN] [1794320050.920825871] [controller_server]: No goal checker was specified in parameter 'current_goal_checker'. Server will use only plugin loaded goal_checker . This warning will appear once.
+[controller_server-2] [WARN] [1794320050.920875803] [controller_server]: No progress checker was specified in parameter 'current_progress_checker'. Server will use only plugin loaded progress_checker . This warning will appear once.
+[controller_server-2] [WARN] [1794320050.920884327] [controller_server]: No path handler was specified in parameter 'current_path_handler'. Server will use only plugin loaded PathHandler . This warning will appear once.
+[controller_server-2] [INFO] [1794320050.921113461] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-2] [ERROR] [1794320095.672079766] [controller_server]: Failed to make progress
+[controller_server-2] [INFO] [1794320095.672988501] [controller_server]: Optimizer reset
+[controller_server-2] [WARN] [1794320095.673074966] [controller_server]: [follow_path] [ActionServer] Aborting handle. error_code:105, error_msg:'Failed to make progress'.
+[controller_server-2] [INFO] [1794320095.691596069] [local_costmap.local_costmap]: Received request to clear entirely for all layers in local_costmap
+[controller_server-2] [INFO] [1794320095.691634110] [local_costmap.local_costmap]: Clearing all layers in costmap: local_costmap
+[controller_server-2] [INFO] [1794320095.691946327] [controller_server]: Received a goal, begin computing control effort.
+[controller_server-2] [ERROR] [1794320095.882110245] [controller_server]: Resulting plan has 0 poses in it.
+[controller_server-2] [INFO] [1794320095.883021802] [controller_server]: Optimizer reset
+[controller_server-2] [WARN] [1794320095.883144483] [controller_server]: [follow_path] [ActionServer] Aborting handle. error_code:103, error_msg:'Resulting plan has 0 poses in it.'.
+[bt_navigator-7] [WARN] [1794320095.901515824] [bt_navigator]: NavigateToPoseNavigator::goalCompleted error 103:Resulting plan has 0 poses in it..
+[bt_navigator-7] [WARN] [1794320095.901546690] [bt_navigator]: [navigate_to_pose] [ActionServer] Aborting handle. error_code:103, error_msg:'Resulting plan has 0 poses in it.'.
+[bt_navigator-7] [ERROR] [1794320095.901680986] [bt_navigator]: Goal failed error_code:103 error_msg:'Resulting plan has 0 poses in it.'
+[bt_navigator-7] [INFO] [1794320096.874535589] [bt_navigator]: Begin navigating from current location (2.95, -2.09) to (-1.42, -2.42)
+[planner_server-4] [INFO] [1794320096.875344349] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320096.914892827] [controller_server]: Received a goal, begin computing control effort.
+[planner_server-4] [INFO] [1794320097.924832248] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320097.964019065] [controller_server]: Passing new path to controller.
+[planner_server-4] [INFO] [1794320098.954805559] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320099.014021992] [controller_server]: Passing new path to controller.
+[planner_server-4] [INFO] [1794320099.974679714] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320100.014197196] [controller_server]: Passing new path to controller.
+[planner_server-4] [INFO] [1794320101.004826121] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320101.064101222] [controller_server]: Passing new path to controller.
+[planner_server-4] [INFO] [1794320102.024712334] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320102.063998218] [controller_server]: Passing new path to controller.
+[planner_server-4] [INFO] [1794320103.055075137] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320103.114095971] [controller_server]: Passing new path to controller.
+[planner_server-4] [INFO] [1794320104.075316156] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320104.114074825] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320108.125338013] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [116]
+[planner_server-4] [INFO] [1794320108.125515994] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320108.163987388] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320109.154778329] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [141]
+[planner_server-4] [INFO] [1794320109.154993438] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320109.214075980] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320112.185131658] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [109]
+[planner_server-4] [INFO] [1794320112.185342795] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320112.213996815] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320113.205138783] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [86]
+[planner_server-4] [INFO] [1794320113.205344924] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320113.264023581] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320114.225319741] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [81]
+[planner_server-4] [INFO] [1794320114.225511886] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320114.264008149] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320115.244979264] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [108]
+[planner_server-4] [INFO] [1794320115.245273281] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320115.314132571] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320116.274989232] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [85]
+[planner_server-4] [INFO] [1794320116.275221528] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320116.313991642] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320117.304826627] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [124]
+[planner_server-4] [INFO] [1794320117.305117239] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320117.364024557] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320119.335128927] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [127]
+[planner_server-4] [INFO] [1794320119.335345131] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320119.364022882] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320120.384467197] [bt_navigator_navigate_to_pose_rclcpp_node]: Node timed out while executing service call to is_path_valid.
+[planner_server-4] [INFO] [1794320120.384693047] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320120.464056191] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320121.415714961] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [120]
+[planner_server-4] [INFO] [1794320121.415923814] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320121.464040234] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320122.435328108] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [121]
+[planner_server-4] [INFO] [1794320122.435535221] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320122.464122922] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320123.464622685] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [120]
+[planner_server-4] [INFO] [1794320123.464831776] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320123.514174278] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320124.475067843] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [119]
+[planner_server-4] [INFO] [1794320124.475308775] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320124.514090839] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320125.504702289] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [119]
+[planner_server-4] [INFO] [1794320125.504910020] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320125.564043763] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320126.525155530] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [118]
+[planner_server-4] [INFO] [1794320126.525342747] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320126.564068652] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320127.545140413] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [119]
+[planner_server-4] [INFO] [1794320127.545335722] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320127.614007789] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320128.565265415] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [119]
+[planner_server-4] [INFO] [1794320128.565508880] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320128.614027195] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320129.594698829] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [116]
+[planner_server-4] [INFO] [1794320129.594908163] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320129.664024322] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320130.614859135] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [119]
+[planner_server-4] [INFO] [1794320130.615198349] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320130.664073984] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320131.644695377] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [125]
+[planner_server-4] [INFO] [1794320131.644866553] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320131.713966839] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320132.666215556] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [120]
+[planner_server-4] [INFO] [1794320132.666438072] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320132.715100284] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320133.696003037] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [113]
+[planner_server-4] [INFO] [1794320133.696278271] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320133.765084282] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320134.726085221] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [111]
+[planner_server-4] [INFO] [1794320134.726315242] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320134.765067594] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320135.755820889] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [114]
+[planner_server-4] [INFO] [1794320135.756051704] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320135.815065820] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320136.776127011] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [111]
+[planner_server-4] [INFO] [1794320136.776349502] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320136.815165151] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320137.806165760] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [114]
+[planner_server-4] [INFO] [1794320137.806363215] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320137.865105664] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320138.826554088] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [113]
+[planner_server-4] [INFO] [1794320138.826714365] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320138.865422757] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320139.865546301] [bt_navigator_navigate_to_pose_rclcpp_node]: Node timed out while executing service call to is_path_valid.
+[planner_server-4] [INFO] [1794320139.865773600] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320139.965320838] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320140.925671060] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [103]
+[planner_server-4] [INFO] [1794320140.925840289] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320140.965064356] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320141.946447233] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [94]
+[planner_server-4] [INFO] [1794320141.946622835] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320142.015146770] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320142.966357437] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [87]
+[planner_server-4] [INFO] [1794320142.966537793] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320143.015084280] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320143.976348722] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [81]
+[planner_server-4] [INFO] [1794320143.976531868] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320144.015073423] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320145.005923627] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [49]
+[planner_server-4] [INFO] [1794320145.006203410] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320145.065066521] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320146.026578648] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [64]
+[planner_server-4] [INFO] [1794320146.026749345] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320146.065123653] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320147.046184707] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [106]
+[planner_server-4] [INFO] [1794320147.046384031] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320147.115146271] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320148.066061683] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [107]
+[planner_server-4] [INFO] [1794320148.066301918] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320148.115113572] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320149.096129499] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [97]
+[planner_server-4] [INFO] [1794320149.096705543] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320149.165108019] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320150.125871801] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [92]
+[planner_server-4] [INFO] [1794320150.126204548] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320150.165108180] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320151.156105899] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [88]
+[planner_server-4] [INFO] [1794320151.156416158] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320151.215104958] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320152.176147660] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [88]
+[planner_server-4] [INFO] [1794320152.176368723] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320152.215194580] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320153.205733348] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [118]
+[planner_server-4] [INFO] [1794320153.205895236] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320153.265078401] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320154.225916437] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [108]
+[planner_server-4] [INFO] [1794320154.226233116] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320154.265089533] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320155.246154045] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [74]
+[planner_server-4] [INFO] [1794320155.246406027] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320155.315182453] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320156.276177798] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [92]
+[planner_server-4] [INFO] [1794320156.276385130] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320156.315192735] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320157.306362966] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [84]
+[planner_server-4] [INFO] [1794320157.306541212] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320157.365181976] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320158.326527599] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [78]
+[planner_server-4] [INFO] [1794320158.326701508] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320158.365068297] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320159.365732208] [bt_navigator_navigate_to_pose_rclcpp_node]: Node timed out while executing service call to is_path_valid.
+[planner_server-4] [INFO] [1794320159.365951367] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320159.465121556] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320169.496283196] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [46]
+[planner_server-4] [INFO] [1794320169.496503056] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320169.565177643] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320170.516392229] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [69]
+[planner_server-4] [INFO] [1794320170.516569581] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320170.565204634] [controller_server]: Passing new path to controller.
+[controller_server-2] [INFO] [1794320191.865199389] [controller_server]: Reached the goal!
+[controller_server-2] [INFO] [1794320191.866252470] [controller_server]: Optimizer reset
+[bt_navigator-7] [INFO] [1794320191.885830666] [bt_navigator]: Goal succeeded
+[bt_navigator-7] [INFO] [1794320192.881654741] [bt_navigator]: Begin navigating from current location (-1.47, -2.81) to (-2.47, 0.68)
+[planner_server-4] [INFO] [1794320192.882462209] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320192.922446767] [controller_server]: Received a goal, begin computing control effort.
+[planner_server-4] [INFO] [1794320193.931892148] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320193.972070190] [controller_server]: Passing new path to controller.
+[planner_server-4] [INFO] [1794320194.961781172] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320195.022112096] [controller_server]: Passing new path to controller.
+[planner_server-4] [INFO] [1794320195.982150443] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320196.022055573] [controller_server]: Passing new path to controller.
+[planner_server-4] [INFO] [1794320196.992097437] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320197.022104573] [controller_server]: Passing new path to controller.
+[planner_server-4] [INFO] [1794320198.021817878] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320198.072073323] [controller_server]: Passing new path to controller.
+[planner_server-4] [INFO] [1794320199.041636607] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320199.072173580] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320202.082426145] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [123]
+[planner_server-4] [INFO] [1794320202.082596699] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320202.122104147] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320205.121844481] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [79]
+[planner_server-4] [INFO] [1794320205.122060712] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320205.172537897] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320206.141715615] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [81]
+[planner_server-4] [INFO] [1794320206.141877328] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320206.172154143] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320207.161856962] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [69]
+[planner_server-4] [INFO] [1794320207.162167276] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320207.222039499] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320208.182108485] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [73]
+[planner_server-4] [INFO] [1794320208.182331329] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320208.222084707] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320210.211724785] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [113]
+[planner_server-4] [INFO] [1794320210.211865008] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320210.272160896] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320211.232069668] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [108]
+[planner_server-4] [INFO] [1794320211.232313090] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320211.272088731] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320212.262245413] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [97]
+[planner_server-4] [INFO] [1794320212.262433114] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320212.322111415] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320213.281773886] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [129]
+[planner_server-4] [INFO] [1794320213.281973999] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320213.322086657] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320214.302387079] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [113]
+[planner_server-4] [INFO] [1794320214.302560903] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320214.322098431] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320215.331742308] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [103]
+[planner_server-4] [INFO] [1794320215.331969356] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320215.372198030] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320216.382157774] [bt_navigator_navigate_to_pose_rclcpp_node]: Node timed out while executing service call to is_path_valid.
+[planner_server-4] [INFO] [1794320216.382408414] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320216.422177704] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320217.431796773] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [42]
+[planner_server-4] [INFO] [1794320217.432017914] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320217.472191548] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320218.461823116] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [40]
+[planner_server-4] [INFO] [1794320218.462059451] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320218.522092836] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320219.492121221] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [46]
+[planner_server-4] [INFO] [1794320219.492314299] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320219.522083495] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320220.512319398] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [45]
+[planner_server-4] [INFO] [1794320220.512531014] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320220.572045369] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320221.532197278] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [42]
+[planner_server-4] [INFO] [1794320221.532399203] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320221.572160676] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320222.551858530] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [45]
+[planner_server-4] [INFO] [1794320222.552192959] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320222.572071181] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320223.581912470] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [43]
+[planner_server-4] [INFO] [1794320223.582176472] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320223.622067715] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320224.602107376] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [42]
+[planner_server-4] [INFO] [1794320224.602323302] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320224.672054766] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320225.632132329] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [42]
+[planner_server-4] [INFO] [1794320225.632348985] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320225.672036939] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320226.661757179] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [38]
+[planner_server-4] [INFO] [1794320226.662110179] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320226.722176641] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320227.682126566] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [93]
+[planner_server-4] [INFO] [1794320227.682355498] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320227.722050719] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320228.711961332] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [48]
+[planner_server-4] [INFO] [1794320228.712357883] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320228.772190142] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320229.732031520] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [42]
+[planner_server-4] [INFO] [1794320229.732268882] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320229.772118077] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320230.761804085] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [56]
+[planner_server-4] [INFO] [1794320230.762025007] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320230.822171086] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320231.782250181] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [38]
+[planner_server-4] [INFO] [1794320231.782454312] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320231.822141191] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320232.811743170] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [60]
+[planner_server-4] [INFO] [1794320232.811893140] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320232.872121701] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320233.832230154] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [55]
+[planner_server-4] [INFO] [1794320233.832429888] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320233.872142730] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320234.871854562] [bt_navigator_navigate_to_pose_rclcpp_node]: Node timed out while executing service call to is_path_valid.
+[planner_server-4] [INFO] [1794320234.872265744] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320234.922128663] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320235.921832756] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [41]
+[planner_server-4] [INFO] [1794320235.922022342] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320235.972332369] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320236.932412531] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [40]
+[planner_server-4] [INFO] [1794320236.932586095] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320236.972128871] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320237.961898636] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [43]
+[planner_server-4] [INFO] [1794320237.962104179] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320238.022116865] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320238.982194771] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [52]
+[planner_server-4] [INFO] [1794320238.982401567] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320239.022034561] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320240.011728036] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [43]
+[planner_server-4] [INFO] [1794320240.011912989] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320240.072073334] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320241.032095112] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [41]
+[planner_server-4] [INFO] [1794320241.032321463] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320241.072091925] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320243.072030190] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [34]
+[planner_server-4] [INFO] [1794320243.072275715] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320243.122081579] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320244.092411078] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [31]
+[planner_server-4] [INFO] [1794320244.092630870] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320244.122063586] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320245.112256626] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [21]
+[planner_server-4] [INFO] [1794320245.112447379] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320245.172022563] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320246.132097529] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [16]
+[planner_server-4] [INFO] [1794320246.132343269] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320246.172142122] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320247.162292871] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [11]
+[planner_server-4] [INFO] [1794320247.162467339] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320247.222086693] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320248.182094877] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [9]
+[planner_server-4] [INFO] [1794320248.182289403] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320248.222193433] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320249.212316823] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [9]
+[planner_server-4] [INFO] [1794320249.212499379] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320249.272093922] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320250.232186326] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [5]
+[planner_server-4] [INFO] [1794320250.232522836] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320250.272189405] [controller_server]: Passing new path to controller.
+[bt_navigator-7] [WARN] [1794320251.262087908] [bt_navigator_navigate_to_pose_rclcpp_node]: Path validation failed. Invalid pose indices: [4]
+[planner_server-4] [INFO] [1794320251.262324488] [planner_server]: Computing path to goal.
+[controller_server-2] [INFO] [1794320251.322104195] [controller_server]: Passing new path to controller.
+[controller_server-2] [INFO] [1794320252.138636172] [controller_server]: Reached the goal!
+[controller_server-2] [INFO] [1794320252.139633611] [controller_server]: Optimizer reset
+[bt_navigator-7] [INFO] [1794320252.158053015] [bt_navigator]: Goal succeeded
