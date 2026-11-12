@@ -3,7 +3,13 @@
 import argparse
 import json
 import math
+from html import escape
 from pathlib import Path
+
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+from matplotlib.colors import ListedColormap
 
 import numpy as np
 import pandas as pd
@@ -235,6 +241,7 @@ def ler_rosbag(caminho, storage_id):
 
     transformacoes = []
     mapas = []
+    mapa_final = None
     eventos = []
     clocks = []
 
@@ -306,6 +313,16 @@ def ler_rosbag(caminho, storage_id):
             )
 
             resolucao = float(msg.info.resolution)
+            # Preserva somente a grade mais recente; não guarda cópias
+            # de todos os mapas na memória.
+            mapa_final = {
+                "tempo_s": tempo,
+                "data": dados_mapa.copy().reshape((msg.info.height, msg.info.width)),
+                "resolucao": resolucao,
+                "origem_x": float(msg.info.origin.position.x),
+                "origem_y": float(msg.info.origin.position.y),
+                "frame_id": msg.header.frame_id,
+            }
 
             conhecidos = int(
                 np.count_nonzero(dados_mapa >= 0)
@@ -402,6 +419,7 @@ def ler_rosbag(caminho, storage_id):
         "odom": odom,
         "tf": tf,
         "mapas": mapas,
+        "mapa_final": mapa_final,
         "eventos": eventos,
         "clocks": clocks,
         "frames": frames,
@@ -1030,6 +1048,199 @@ def analisar_qualidade(dados, inicio, fim):
 
 
 # ============================================================
+# RELATORIO VISUAL OFFLINE
+# ============================================================
+
+def gerar_relatorio_visual(pasta, resultados, tabela_odom, tabela_slam,
+                          evolucao, eventos, mapa_final, inicio):
+    """Cria HTML e PNG a partir da rosbag, sem depender do RViz aberto."""
+    pasta = Path(pasta)
+    pasta.mkdir(parents=True, exist_ok=True)
+    imagens = pasta / "graficos"
+    imagens.mkdir(exist_ok=True)
+    figuras = []
+
+    def salvar(fig, arquivo, titulo, interpretacao):
+        destino = imagens / arquivo
+        fig.savefig(destino, dpi=155, bbox_inches="tight")
+        plt.close(fig)
+        figuras.append(("graficos/" + arquivo, titulo, interpretacao))
+
+    metodo = str(resultados.get("experimento_metodo_slam", "nao_informado"))
+
+    # 1. Trajetorias alinhadas: a comparacao e da geometria, nao da rota do Nav2.
+    fig, ax = plt.subplots(figsize=(8, 6))
+    ax.plot(tabela_odom["x_ref"], tabela_odom["y_ref"],
+            label="Ground truth", linewidth=2)
+    ax.plot(tabela_odom["x_est"], tabela_odom["y_est"],
+            label="Odometria", linewidth=1.3, alpha=.85)
+    if not tabela_slam.empty:
+        ax.plot(tabela_slam["x_est"], tabela_slam["y_est"],
+                label="SLAM (" + metodo.upper() + ")", linewidth=1.4)
+    ax.set(title="Trajetorias no plano XY", xlabel="X (m)", ylabel="Y (m)")
+    ax.axis("equal")
+    ax.grid(alpha=.25)
+    ax.legend()
+    salvar(fig, "trajetorias.png", "Trajetórias",
+           "Compara o percurso de referência com a odometria e a estimativa global do método SLAM, após alinhamento inicial SE(2).")
+
+    # 2. Erros absolutos de posicao ao longo do tempo
+    fig, ax = plt.subplots(figsize=(9, 4))
+    ax.plot(tabela_odom["tempo_s"] - inicio, tabela_odom["erro_posicao_m"],
+            label="Odometria", linewidth=1.4)
+    if not tabela_slam.empty:
+        ax.plot(tabela_slam["tempo_s"] - inicio, tabela_slam["erro_posicao_m"],
+                label="SLAM (" + metodo.upper() + ")", linewidth=1.4)
+    ax.set(title="Erro absoluto de posicao (ATE)", xlabel="Tempo experimental (s)",
+           ylabel="Erro de posicao (m)")
+    ax.legend(); ax.grid(alpha=.25)
+    salvar(fig, "erro_posicao.png", "Evolução do erro de posição",
+           "Indica em quais instantes a estimativa se afasta da referência; valores menores são preferíveis.")
+
+    # 3. Erros absolutos angulares
+    fig, ax = plt.subplots(figsize=(9, 4))
+    ax.plot(tabela_odom["tempo_s"] - inicio, tabela_odom["erro_angular_graus"],
+            label="Odometria", linewidth=1.4)
+    if not tabela_slam.empty:
+        ax.plot(tabela_slam["tempo_s"] - inicio, tabela_slam["erro_angular_graus"],
+                label="SLAM (" + metodo.upper() + ")", linewidth=1.4)
+    ax.set(title="Erro absoluto angular", xlabel="Tempo experimental (s)",
+           ylabel="Erro de orientacao (graus)")
+    ax.legend(); ax.grid(alpha=.25)
+    salvar(fig, "erro_angular.png", "Evolução do erro angular",
+           "Mostra desvios de orientação que podem influenciar a projeção de varreduras e a navegação.")
+
+    # 4. RPE translacional entre janelas temporais
+    janelas = [1, 5, 10]
+    odom_rpe = [resultados.get(f"odom_RPE_{j}s_translacao_m_RMSE", float("nan")) for j in janelas]
+    slam_rpe = [resultados.get(f"slam_RPE_{j}s_translacao_m_RMSE", float("nan")) for j in janelas]
+    fig, ax = plt.subplots(figsize=(8, 4))
+    xx = np.arange(len(janelas))
+    ax.bar(xx - .18, odom_rpe, .35, label="Odometria")
+    if np.any(np.isfinite(slam_rpe)):
+        ax.bar(xx + .18, slam_rpe, .35, label="SLAM (" + metodo.upper() + ")")
+    ax.set_xticks(xx, [f"{j} s" for j in janelas])
+    ax.set(ylabel="RPE translacional RMSE (m)", title="Consistencia local da trajetoria")
+    ax.legend(); ax.grid(axis="y", alpha=.25)
+    salvar(fig, "rpe_translacao.png", "Erro relativo de trajetória (RPE)",
+           "Compara a precisão dos deslocamentos relativos em janelas de 1, 5 e 10 segundos. Valores menores indicam maior consistência local.")
+
+    # 5. Evolucao da area conhecida e composicao final
+    if not evolucao.empty:
+        fig, ax = plt.subplots(figsize=(9, 4))
+        ax.plot(evolucao["tempo_relativo_s"], evolucao["area_conhecida_m2"],
+                label="Area conhecida", linewidth=2)
+        ax.plot(evolucao["tempo_relativo_s"], evolucao["area_livre_m2"],
+                label="Area livre", linewidth=1.1)
+        ax.plot(evolucao["tempo_relativo_s"], evolucao["area_ocupada_m2"],
+                label="Area ocupada (celulas > 0)", linewidth=1.1)
+        ax.set(title="Evolucao das areas do mapa", xlabel="Tempo experimental (s)",
+               ylabel="Area (m²)")
+        ax.legend(); ax.grid(alpha=.25)
+        salvar(fig, "evolucao_mapa.png", "Evolução do mapeamento",
+               "A área conhecida indica quanto do ambiente foi observado. A curva não mede diretamente a precisão geométrica do mapa.")
+
+    # 6. Eventos da exploracao
+    if not eventos.empty:
+        tipos = ["GOAL_SENT", "GOAL_REACHED", "GOAL_FAILED", "GOAL_ERROR"]
+        contagens = [int((eventos["event"] == e).sum()) for e in tipos]
+        fig, ax = plt.subplots(figsize=(8, 3.8))
+        ax.bar(["Enviados", "Alcancados", "Falhos", "Erros"], contagens)
+        ax.set(title="Eventos da navegacao autonoma", ylabel="Ocorrencias")
+        ax.grid(axis="y", alpha=.25)
+        salvar(fig, "eventos.png", "Objetivos de navegação",
+               "Distingue destinos enviados, alcançados e com falha. Metas sem resultado podem estar pendentes no término do experimento.")
+
+    # 7. Mapa final: sem screenshot da interface, fiel aos dados publicados
+    mapa_status = "Mapa final indisponivel: o topico /map nao foi registrado."
+    if mapa_final is not None:
+        dados_m = mapa_final["data"]
+        # Em ROS OccupancyGrid -1 e desconhecido, 0 livre, 1..100 ocupado.
+        # O mapa usa escala de cinza semelhante à exibição usual no RViz.
+        cores = np.empty(dados_m.shape + (3,), dtype=np.uint8)
+        cores[:] = (170, 170, 170)  # desconhecido
+        conhecido = dados_m >= 0
+        cinza = np.clip(255.0 * (1.0 - dados_m[conhecido] / 100.0), 0, 255).astype(np.uint8)
+        cores[conhecido] = np.stack([cinza, cinza, cinza], axis=-1)
+        # origin fica no canto inferior esquerdo no grid ROS, origin='lower'
+        alt, larg = dados_m.shape
+        x0, y0 = mapa_final["origem_x"], mapa_final["origem_y"]
+        res = mapa_final["resolucao"]
+        fig, ax = plt.subplots(figsize=(8, 8))
+        ax.imshow(cores, origin="lower", interpolation="nearest",
+                  extent=[x0, x0 + larg * res, y0, y0 + alt * res])
+        ax.set(title=f"Ultimo mapa /map na rosbag - {metodo.upper()}",
+               xlabel=f"X ({mapa_final['frame_id']}, m)",
+               ylabel=f"Y ({mapa_final['frame_id']}, m)")
+        ax.set_aspect("equal")
+        salvar(fig, "mapa_final.png", "Mapa de ocupação final",
+               "Imagem gerada da última mensagem /map disponível na rosbag: branco = livre, preto = ocupado, cinza = desconhecido. Não é uma captura da interface do RViz2.")
+        # arquivo de acesso direto na raiz da pasta de resultados
+        import shutil
+        shutil.copy2(imagens / "mapa_final.png", pasta / "mapa_final.png")
+        mapa_status = (f"Último mapa registrado em t={mapa_final['tempo_s']:.2f} s "
+                       f"(relógio absoluto); referencial {mapa_final['frame_id']}.")
+
+    def numero(chave, casas=3):
+        valor = resultados.get(chave)
+        try:
+            if valor is None or not math.isfinite(float(valor)):
+                return "Indisponível"
+            return f"{float(valor):.{casas}f}"
+        except (ValueError, TypeError):
+            return "Indisponível"
+
+    kpis = [
+        ("Método", escape(metodo.upper()), "Algoritmo declarado no experimento"),
+        ("Duração analisada", numero("experimento_duracao_analisada_s", 1) + " s", "Tempo efetivo disponível"),
+        ("ATE SLAM", numero("slam_ATE_m_RMSE") + " m", "RMSE translacional; menor é melhor"),
+        ("ATE odometria", numero("odom_ATE_m_RMSE") + " m", "Referência de comparação"),
+        ("ATE angular SLAM", numero("slam_ATE_angular_graus_RMSE") + "°", "RMSE da orientação"),
+        ("Área acrescentada", numero("mapa_variacao_area_conhecida_m2", 2) + " m²", "Variação da área conhecida"),
+        ("Metas alcançadas", numero("exploracao_objetivos_alcancados", 0), "Não inclui metas pendentes"),
+        ("Execução completa", "SIM" if resultados.get("experimento_intervalo_completo") else "NÃO", "Conferência da duração requerida"),
+    ]
+    cards = "\n".join(
+        f'<div class="card"><div class="card-title">{titulo}</div><div class="number">{valor}</div><small>{nota}</small></div>'
+        for titulo, valor, nota in kpis
+    )
+    blocos = "\n".join(
+        f'<section><h2>{escape(titulo)}</h2><p>{escape(nota)}</p><img src="{arquivo}" alt="{escape(titulo)}"></section>'
+        for arquivo, titulo, nota in figuras
+    )
+    notas = (
+        "A estimativa SLAM é reconstruída de map→odom→base_link. "
+        "As trajetórias são comparadas após alinhamento inicial SE(2). "
+        "O mapa final provém da mensagem /map e pode diferir da aparência do RViz2 "
+        "se o RViz2 estiver exibindo outro Fixed Frame, camadas ou marcadores. "
+        "A ausência de uma métrica não deve ser interpretada como valor zero."
+    )
+    html = f"""<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Experimento SLAM — {escape(metodo.upper())}</title>
+    <style>
+    :root {{font-family:system-ui,Arial,sans-serif;color:#192438;background:#f3f6fb}}
+    body {{margin:0}}header {{background:#10233f;color:white;padding:42px max(24px,calc((100vw - 1100px)/2))}}
+    main {{max-width:1100px;margin:auto;padding:24px}}
+    .grid {{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:13px}}
+    .card,section {{background:white;border-radius:12px;padding:18px;box-shadow:0 2px 10px #10233f14}}
+    .card-title {{font-weight:700;color:#40526a}}.number {{font-size:1.7rem;font-weight:800;margin:8px 0}}
+    small,p {{color:#56657a;line-height:1.55}}section {{margin-top:22px}}
+    section img {{width:100%;height:auto;display:block;object-fit:contain}}
+    h1 {{margin:0 0 8px}}h2 {{font-size:1.25rem}}footer {{padding:24px 0;color:#53677c}}
+    </style></head><body>
+    <header><h1>Relatório visual de experimento SLAM</h1>
+    <div>Método: {escape(metodo.upper())} · Início simulado absoluto: {numero('experimento_inicio_simulado_s',2)} s
+    · Duração solicitada: {numero('experimento_duracao_configurada_s',1)} s</div></header>
+    <main><div class="grid">{cards}</div>
+    <section><h2>Como interpretar</h2><p>{escape(notas)}</p><p>{escape(mapa_status)}</p></section>
+    {blocos}<footer>Relatório gerado localmente a partir dos dados da rosbag. Dados tabulares disponíveis nos arquivos CSV do mesmo diretório.</footer>
+    </main></body></html>"""
+    (pasta / "relatorio.html").write_text(html, encoding="utf-8")
+    return pasta / "relatorio.html"
+
+
+# ============================================================
 # EXECUÇÃO PRINCIPAL
 # ============================================================
 
@@ -1380,6 +1591,16 @@ def main():
         saida_metricas,
         index=False,
     )
+
+    print("\nGerando graficos e mapa final a partir da rosbag...")
+    relatorio = gerar_relatorio_visual(
+        pasta_resultados, resultados, tabela_odom, tabela_slam,
+        evolucao, eventos_filtrados, dados["mapa_final"], inicio,
+    )
+    print(f"Relatorio visual: {relatorio}")
+    print(f"Mapa final: {pasta_resultados / 'mapa_final.png'}"
+          if (pasta_resultados / 'mapa_final.png').exists()
+          else "Mapa final indisponivel na gravacao.")
 
     print("\n====================================")
     print("RESULTADOS")

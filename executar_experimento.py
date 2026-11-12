@@ -435,8 +435,6 @@ def executar(numero, duracao, metodo):
                 / "analisar_experimento.sh"
             ),
             str(numero),
-            str(duracao),
-            metodo,
         ],
         check=True,
     )

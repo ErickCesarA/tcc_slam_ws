@@ -1,0 +1,12 @@
+{
+  "experimentos": [
+    "001",
+    "002",
+    "003"
+  ],
+  "janela_comum_s": 180.0,
+  "avisos": [
+    "Comparação descritiva: resultados de execuções isoladas não demonstram superioridade estatística. Para comparar desempenho, utilize o mesmo ambiente, robô, duração e condições iniciais.",
+    "Metas e área conhecida dependem do percurso explorado; diferença de cobertura não é sinônimo de precisão do mapa."
+  ]
+}

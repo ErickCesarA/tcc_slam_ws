@@ -1,0 +1,43 @@
+metrica,descricao,unidade,experimento,metodo,valor
+slam_ATE_m_RMSE,ATE posição — RMSE,m,001,graph,2.870813418562554
+slam_ATE_m_RMSE,ATE posição — RMSE,m,002,rbpf,0.2113137619016954
+slam_ATE_m_RMSE,ATE posição — RMSE,m,003,ekf,0.0501555299118156
+slam_ATE_angular_graus_RMSE,ATE angular — RMSE,°,001,graph,81.27367897314018
+slam_ATE_angular_graus_RMSE,ATE angular — RMSE,°,002,rbpf,12.318120057329123
+slam_ATE_angular_graus_RMSE,ATE angular — RMSE,°,003,ekf,4.36452557362058
+slam_RPE_1s_translacao_m_RMSE,RPE translação (1 s),m,001,graph,0.4437994441151813
+slam_RPE_1s_translacao_m_RMSE,RPE translação (1 s),m,002,rbpf,0.1457760866070107
+slam_RPE_1s_translacao_m_RMSE,RPE translação (1 s),m,003,ekf,0.0015445410905045
+slam_RPE_5s_translacao_m_RMSE,RPE translação (5 s),m,001,graph,1.367977048218716
+slam_RPE_5s_translacao_m_RMSE,RPE translação (5 s),m,002,rbpf,0.1960491267373577
+slam_RPE_5s_translacao_m_RMSE,RPE translação (5 s),m,003,ekf,0.0048715386909265
+slam_RPE_10s_translacao_m_RMSE,RPE translação (10 s),m,001,graph,2.057057522874026
+slam_RPE_10s_translacao_m_RMSE,RPE translação (10 s),m,002,rbpf,0.2506072730964211
+slam_RPE_10s_translacao_m_RMSE,RPE translação (10 s),m,003,ekf,0.0087980020957494
+mapa_variacao_area_conhecida_m2,Expansão da área conhecida,m²,001,graph,
+mapa_variacao_area_conhecida_m2,Expansão da área conhecida,m²,002,rbpf,94.74000282347204
+mapa_variacao_area_conhecida_m2,Expansão da área conhecida,m²,003,ekf,42.12000125527382
+mapa_taxa_media_m2_s,Taxa média de mapeamento,m²/s,001,graph,
+mapa_taxa_media_m2_s,Taxa média de mapeamento,m²/s,002,rbpf,0.5263333490192891
+mapa_taxa_media_m2_s,Taxa média de mapeamento,m²/s,003,ekf,0.2340000069737434
+exploracao_eficiencia_m2_por_m,Expansão por distância,m²/m,001,graph,
+exploracao_eficiencia_m2_por_m,Expansão por distância,m²/m,002,rbpf,7.25845915865747
+exploracao_eficiencia_m2_por_m,Expansão por distância,m²/m,003,ekf,5.080460986942524
+exploracao_objetivos_enviados,Metas enviadas,,001,graph,3.0
+exploracao_objetivos_enviados,Metas enviadas,,002,rbpf,2.0
+exploracao_objetivos_enviados,Metas enviadas,,003,ekf,2.0
+exploracao_objetivos_alcancados,Metas alcançadas,,001,graph,1.0
+exploracao_objetivos_alcancados,Metas alcançadas,,002,rbpf,1.0
+exploracao_objetivos_alcancados,Metas alcançadas,,003,ekf,1.0
+exploracao_objetivos_falhos,Metas falhas,,001,graph,1.0
+exploracao_objetivos_falhos,Metas falhas,,002,rbpf,0.0
+exploracao_objetivos_falhos,Metas falhas,,003,ekf,0.0
+exploracao_objetivos_sem_resultado,Metas sem resultado,,001,graph,1.0
+exploracao_objetivos_sem_resultado,Metas sem resultado,,002,rbpf,1.0
+exploracao_objetivos_sem_resultado,Metas sem resultado,,003,ekf,1.0
+experimento_duracao_configurada_s,Duração solicitada,s,001,graph,180.0
+experimento_duracao_configurada_s,Duração solicitada,s,002,rbpf,180.0
+experimento_duracao_configurada_s,Duração solicitada,s,003,ekf,180.0
+experimento_duracao_analisada_s,Duração analisada,s,001,graph,180.0
+experimento_duracao_analisada_s,Duração analisada,s,002,rbpf,180.0
+experimento_duracao_analisada_s,Duração analisada,s,003,ekf,180.0
