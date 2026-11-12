@@ -1,0 +1,516 @@
+#!/usr/bin/env python3
+"""Exploracao por fronteiras com validacao de seguranca e custo Nav2.
+
+V2: conserva a identificacao de fronteiras V1, adiciona selecao de pontos
+seguros, planejamento assincrono via ComputePathToPose e eventos rastreaveis.
+Nao realiza preempcao de metas: uma mudanca deliberada para etapa posterior.
+"""
+import json
+import math
+from collections import deque
+
+import rclpy
+from action_msgs.msg import GoalStatus
+from geometry_msgs.msg import PoseStamped
+from nav2_msgs.action import ComputePathToPose, NavigateToPose
+from nav_msgs.msg import OccupancyGrid
+from rclpy.action import ActionClient
+from rclpy.duration import Duration
+from rclpy.node import Node
+from rclpy.qos import DurabilityPolicy, QoSProfile, ReliabilityPolicy
+from rclpy.time import Time
+from std_msgs.msg import String
+from tf2_ros import Buffer, TransformException, TransformListener
+
+
+def angle_from_quaternion(q):
+    return math.atan2(2.0 * (q.w * q.z + q.x * q.y),
+                      1.0 - 2.0 * (q.y * q.y + q.z * q.z))
+
+
+class FrontierExplorer(Node):
+    def __init__(self):
+        super().__init__('frontier_explorer')
+        self.declare_parameter('map_topic', '/map')
+        self.declare_parameter('map_frame', 'map')
+        self.declare_parameter('robot_frame', 'base_link')
+        self.declare_parameter('free_threshold', 25)
+        self.declare_parameter('min_frontier_size', 5)
+        self.declare_parameter('blacklist_radius', 0.5)
+        self.declare_parameter('exploration_period_s', 2.0)
+        self.declare_parameter('safety_radius_m', 0.30)
+        self.declare_parameter('standoff_min_m', 0.25)
+        self.declare_parameter('standoff_max_m', 0.85)
+        self.declare_parameter('candidate_limit', 5)
+        self.declare_parameter('goal_min_distance_m', 0.35)
+        self.declare_parameter('plan_timeout_s', 8.0)
+        self.declare_parameter('planning_weight_size', 0.5)
+        self.declare_parameter('blacklist_failure_s', 60.0)
+        self.declare_parameter('blacklist_success_s', 10.0)
+        self.declare_parameter('planner_id', '')
+        self.declare_parameter('use_path_validation', True)
+
+        def p(name):
+            return self.get_parameter(name).value
+
+        self.map_topic = str(p('map_topic'))
+        self.map_frame = str(p('map_frame'))
+        self.robot_frame = str(p('robot_frame'))
+        self.free_threshold = int(p('free_threshold'))
+        self.min_frontier_size = int(p('min_frontier_size'))
+        self.blacklist_radius = float(p('blacklist_radius'))
+        self.safety_radius_m = float(p('safety_radius_m'))
+        self.standoff_min_m = float(p('standoff_min_m'))
+        self.standoff_max_m = float(p('standoff_max_m'))
+        self.candidate_limit = max(1, int(p('candidate_limit')))
+        self.goal_min_distance_m = float(p('goal_min_distance_m'))
+        self.plan_timeout_s = float(p('plan_timeout_s'))
+        self.planning_weight_size = float(p('planning_weight_size'))
+        self.blacklist_failure_s = float(p('blacklist_failure_s'))
+        self.blacklist_success_s = float(p('blacklist_success_s'))
+        self.planner_id = str(p('planner_id'))
+        self.use_path_validation = bool(p('use_path_validation'))
+        if not (0.0 <= self.planning_weight_size <= 1.0):
+            raise ValueError('planning_weight_size deve estar entre 0 e 1')
+        if self.standoff_min_m < 0 or self.standoff_max_m < self.standoff_min_m:
+            raise ValueError('standoff_min_m/max_m invalidos')
+        if self.safety_radius_m < 0:
+            raise ValueError('safety_radius_m nao pode ser negativo')
+
+        self.map_data = None
+        self.blacklist = []
+        self.state = 'IDLE'  # IDLE, PLANNING, SENDING, NAVIGATING
+        self.goal_handle = None
+        self.current = None
+        self.goal_counter = 0
+        self.pending_candidates = []
+        self.planning_started = 0.0
+        self.current_plan_token = 0
+        self.current_plan_handle = None
+        self.reachable_candidates = []
+        self.last_notice = {}
+
+        self.event_publisher = self.create_publisher(
+            String, '/exploration/events', 10)
+        self.tf_buffer = Buffer()
+        self.tf_listener = TransformListener(self.tf_buffer, self)
+        qos = QoSProfile(depth=1,
+                         reliability=ReliabilityPolicy.RELIABLE,
+                         durability=DurabilityPolicy.TRANSIENT_LOCAL)
+        self.create_subscription(OccupancyGrid, self.map_topic,
+                                 self.map_callback, qos)
+        self.nav_client = ActionClient(self, NavigateToPose,
+                                       '/navigate_to_pose')
+        self.plan_client = ActionClient(self, ComputePathToPose,
+                                        '/compute_path_to_pose')
+        self.create_timer(float(p('exploration_period_s')),
+                          self.exploration_cycle)
+        self.create_timer(0.5, self.planning_watchdog)
+        self.get_logger().info('Frontier Explorer V2 iniciado (Nav2 path validation).')
+        self.publish_event('EXPLORATION_STARTED', version='2.0')
+
+    def now_s(self):
+        return self.get_clock().now().nanoseconds / 1e9
+
+    def notice(self, key, message, interval=10.0):
+        now = self.now_s()
+        if now - self.last_notice.get(key, -1e10) >= interval:
+            self.last_notice[key] = now
+            self.get_logger().info(message)
+
+    def publish_event(self, event, **fields):
+        obj = {'event': event, 'timestamp': self.now_s(), **fields}
+        message = String()
+        message.data = json.dumps(obj, ensure_ascii=False)
+        self.event_publisher.publish(message)
+        self.get_logger().info(f'Evento: {event} | {fields}')
+
+    def map_callback(self, msg):
+        if msg.info.width and msg.info.height and \
+                len(msg.data) == msg.info.width * msg.info.height:
+            self.map_data = msg
+
+    def robot_position(self):
+        try:
+            tr = self.tf_buffer.lookup_transform(self.map_frame,
+                self.robot_frame, Time(), timeout=Duration(seconds=0.1))
+            return tr.transform.translation.x, tr.transform.translation.y
+        except TransformException as exc:
+            self.notice('tf', f'Aguardando TF do robo: {exc}')
+            return None
+
+    def is_frontier(self, x, y, width, height, data):
+        val = data[y * width + x]
+        if val < 0 or val > self.free_threshold:
+            return False
+        for dy in (-1, 0, 1):
+            for dx in (-1, 0, 1):
+                if dx == 0 and dy == 0:
+                    continue
+                nx, ny = x + dx, y + dy
+                if 0 <= nx < width and 0 <= ny < height and \
+                        data[ny * width + nx] == -1:
+                    return True
+        return False
+
+    def find_frontiers(self):
+        if self.map_data is None:
+            return []
+        w, h = self.map_data.info.width, self.map_data.info.height
+        data = self.map_data.data
+        cells = set()
+        for y in range(h):
+            for x in range(w):
+                if self.is_frontier(x, y, w, h, data):
+                    cells.add((x, y))
+        groups = []
+        while cells:
+            start = cells.pop()
+            queue = deque([start])
+            group = [start]
+            while queue:
+                cx, cy = queue.popleft()
+                for dy in (-1, 0, 1):
+                    for dx in (-1, 0, 1):
+                        item = (cx + dx, cy + dy)
+                        if item in cells:
+                            cells.remove(item)
+                            group.append(item)
+                            queue.append(item)
+            if len(group) >= self.min_frontier_size:
+                groups.append(group)
+        return groups
+
+    def cell_to_world(self, cell):
+        info = self.map_data.info
+        x = (cell[0] + .5) * info.resolution
+        y = (cell[1] + .5) * info.resolution
+        yaw = angle_from_quaternion(info.origin.orientation)
+        return (info.origin.position.x + math.cos(yaw)*x - math.sin(yaw)*y,
+                info.origin.position.y + math.sin(yaw)*x + math.cos(yaw)*y)
+
+    def world_to_cell(self, x, y):
+        info = self.map_data.info
+        dx, dy = x-info.origin.position.x, y-info.origin.position.y
+        yaw = angle_from_quaternion(info.origin.orientation)
+        return (math.floor((math.cos(yaw)*dx + math.sin(yaw)*dy) /
+                           info.resolution),
+                math.floor((-math.sin(yaw)*dx + math.cos(yaw)*dy) /
+                           info.resolution))
+
+    def safe_cell(self, cell):
+        """Conservative check: entire disk known free in occupancy grid.
+
+        Nav2's costmap and planner are still authoritative on reachability.
+        """
+        if self.map_data is None or self.map_data.info.resolution <= 0:
+            return False
+        w, h = self.map_data.info.width, self.map_data.info.height
+        cx, cy = cell
+        radius = math.ceil(self.safety_radius_m / self.map_data.info.resolution)
+        data = self.map_data.data
+        for dy in range(-radius, radius + 1):
+            for dx in range(-radius, radius + 1):
+                if dx*dx + dy*dy > (self.safety_radius_m /
+                                    self.map_data.info.resolution)**2:
+                    continue
+                x, y = cx + dx, cy + dy
+                if not (0 <= x < w and 0 <= y < h):
+                    return False
+                v = data[y * w + x]
+                if v < 0 or v > self.free_threshold:
+                    return False
+        return True
+
+    def blocked(self, x, y):
+        now = self.now_s()
+        self.blacklist = [b for b in self.blacklist
+                          if now - b['time'] < b['duration']]
+        return any(math.hypot(x-b['x'], y-b['y']) < self.blacklist_radius
+                   for b in self.blacklist)
+
+    def blacklist_goal(self, candidate, reason, duration):
+        if candidate is None:
+            return
+        self.blacklist.append({'x': candidate['x'], 'y': candidate['y'],
+                               'reason': reason, 'time': self.now_s(),
+                               'duration': duration})
+
+    def candidates(self, groups, robot_x, robot_y):
+        """Find free standoff cells around a group's centroid, rank cheaply.
+
+        Limit scans to an annulus around each frontier center. Exclude cells
+        occupied/unknown or too near an obstacle. Return one goal per group.
+        """
+        info = self.map_data.info
+        resolution = info.resolution
+        if resolution <= 0:
+            return []
+        min_r = max(1, math.ceil(self.standoff_min_m / resolution))
+        max_r = max(min_r, math.ceil(self.standoff_max_m / resolution))
+        candidates = []
+        for cluster in groups:
+            cx = sum(p[0] for p in cluster) / len(cluster)
+            cy = sum(p[1] for p in cluster) / len(cluster)
+            representative = min(cluster, key=lambda p:
+                                 (p[0]-cx)**2+(p[1]-cy)**2)
+            best = None
+            # Search standoff around centroid, not necessarily on frontier.
+            for dy in range(-max_r, max_r + 1):
+                for dx in range(-max_r, max_r + 1):
+                    r2 = dx*dx + dy*dy
+                    if r2 < min_r*min_r or r2 > max_r*max_r:
+                        continue
+                    cell = (representative[0]+dx,
+                            representative[1]+dy)
+                    if not self.safe_cell(cell):
+                        continue
+                    x, y = self.cell_to_world(cell)
+                    dist = math.hypot(x-robot_x, y-robot_y)
+                    if dist < self.goal_min_distance_m or self.blocked(x, y):
+                        continue
+                    # Keep the nearest suitable approach point for this group.
+                    deviation = math.sqrt((cell[0]-cx)**2 +
+                                          (cell[1]-cy)**2) * resolution
+                    cheap = dist + 0.15 * deviation
+                    if best is None or cheap < best['cheap']:
+                        best = {'x': x, 'y': y, 'cell': cell, 'size': len(cluster),
+                                'distance': dist, 'cheap': cheap,
+                                'frontier_cell': representative}
+            if best:
+                best['score'] = best['distance'] / math.sqrt(best['size'])
+                candidates.append(best)
+        candidates.sort(key=lambda c: (c['score'], c['distance']))
+        return candidates[:self.candidate_limit]
+
+    def pose_stamped(self, x, y, robot_x, robot_y):
+        pose = PoseStamped()
+        pose.header.frame_id = self.map_frame
+        pose.header.stamp = self.get_clock().now().to_msg()
+        pose.pose.position.x = float(x)
+        pose.pose.position.y = float(y)
+        yaw = math.atan2(y-robot_y, x-robot_x)
+        pose.pose.orientation.z = math.sin(yaw/2.0)
+        pose.pose.orientation.w = math.cos(yaw/2.0)
+        return pose
+
+    def exploration_cycle(self):
+        if self.state != 'IDLE':
+            return
+        if self.map_data is None:
+            self.notice('map', 'Aguardando mapa de ocupacao /map...')
+            return
+        if not self.nav_client.server_is_ready():
+            self.notice('nav', 'Aguardando action /navigate_to_pose...')
+            return
+        if self.use_path_validation and not self.plan_client.server_is_ready():
+            self.notice('plan', 'Aguardando action /compute_path_to_pose...')
+            return
+        robot = self.robot_position()
+        if robot is None:
+            return
+        groups = self.find_frontiers()
+        if not groups:
+            self.notice('none', 'Nenhuma fronteira valida encontrada.')
+            return
+        candidates = self.candidates(groups, *robot)
+        if not candidates:
+            self.notice('blocked', 'Sem destinos seguros nas fronteiras atuais.')
+            return
+        self.get_logger().info(
+            f'{len(groups)} fronteiras; {len(candidates)} destinos candidatos seguros.')
+        self.pending_candidates = candidates
+        self.reachable_candidates = []
+        self.plan_robot = robot
+        if self.use_path_validation:
+            self.state = 'PLANNING'
+            self.plan_next_candidate()
+        else:
+            candidate = self.pending_candidates.pop(0)
+            self.commit_goal(candidate, None)
+
+    def planning_watchdog(self):
+        if self.state != 'PLANNING':
+            return
+        if self.now_s() - self.planning_started > self.plan_timeout_s:
+            self.get_logger().warning('Timeout ao planejar rota; descartando candidato.')
+            self.current_plan_token += 1
+            # Cancel active planning goal (best effort) so the planner isn't loaded.
+            if self.current_plan_handle is not None:
+                try:
+                    self.current_plan_handle.cancel_goal_async()
+                except Exception:
+                    pass
+            self.current_plan_handle = None
+            self.plan_next_candidate()
+
+    def plan_next_candidate(self):
+        if not self.pending_candidates:
+            if self.reachable_candidates:
+                best = min(self.reachable_candidates,
+                           key=lambda c: (c['path_score'], c['path_length_m']))
+                self.commit_goal(best, best['path_length_m'])
+            else:
+                self.state = 'IDLE'
+                self.notice('unreachable', 'Todas as candidatas foram rejeitadas pelo planejador.')
+            return
+        candidate = self.pending_candidates.pop(0)
+        self.current = candidate
+        self.current_plan_handle = None
+        self.current_plan_token += 1
+        token = self.current_plan_token
+        self.planning_started = self.now_s()
+        goal = ComputePathToPose.Goal()
+        goal.goal = self.pose_stamped(candidate['x'], candidate['y'],
+                                      *self.plan_robot)
+        goal.planner_id = self.planner_id
+        goal.use_start = False  # planner obtains latest robot pose from TF
+        future = self.plan_client.send_goal_async(goal)
+        future.add_done_callback(lambda f, t=token:
+                                 self.plan_accepted_callback(f, t))
+
+    def plan_accepted_callback(self, future, token):
+        if self.state != 'PLANNING' or token != self.current_plan_token:
+            return
+        try:
+            handle = future.result()
+            if not handle.accepted:
+                self.reject_candidate('PLANNER_GOAL_REJECTED')
+                return
+            self.current_plan_handle = handle
+            handle.get_result_async().add_done_callback(
+                lambda f, t=token: self.plan_result_callback(f, t))
+        except Exception as exc:
+            self.reject_candidate(f'PLANNER_ERROR: {exc}')
+
+    def plan_result_callback(self, future, token):
+        if self.state != 'PLANNING' or token != self.current_plan_token:
+            return
+        try:
+            response = future.result()
+            poses = response.result.path.poses
+            if response.status != GoalStatus.STATUS_SUCCEEDED or len(poses) < 2:
+                self.reject_candidate(f'NO_PATH_STATUS_{response.status}')
+                return
+            length = sum(math.hypot(b.pose.position.x-a.pose.position.x,
+                                    b.pose.position.y-a.pose.position.y)
+                         for a, b in zip(poses[:-1], poses[1:]))
+            self.current_plan_handle = None
+            candidate = self.current
+            # use path length as movement cost; frontier size as cheap information proxy
+            candidate['path_length_m'] = length
+            candidate['path_score'] = length / (candidate['size'] **
+                                                 self.planning_weight_size)
+            # Compare real path costs for the reachable shortlisted candidates.
+            self.reachable_candidates.append(candidate)
+            self.plan_next_candidate()
+        except Exception as exc:
+            self.reject_candidate(f'PLANNER_RESULT_ERROR: {exc}')
+
+    def reject_candidate(self, reason):
+        c = self.current
+        self.publish_event('FRONTIER_UNREACHABLE', x=c['x'], y=c['y'],
+                           reason=reason)
+        self.blacklist_goal(c, reason, self.blacklist_failure_s)
+        self.current_plan_handle = None
+        self.plan_next_candidate()
+
+    def commit_goal(self, candidate, length):
+        self.goal_counter += 1
+        goal_id = self.goal_counter
+        self.current = candidate
+        self.current['goal_id'] = goal_id
+        self.current['start_time'] = self.now_s()
+        self.state = 'SENDING'
+        self.publish_event('FRONTIER_SELECTED', goal_id=goal_id,
+                           x=candidate['x'], y=candidate['y'],
+                           distance=candidate['distance'],
+                           path_length_m=length,
+                           frontier_size=candidate['size'],
+                           score=candidate.get('path_score', candidate['score']))
+        nav_goal = NavigateToPose.Goal()
+        nav_goal.pose = self.pose_stamped(candidate['x'], candidate['y'],
+                                          *self.plan_robot)
+        self.publish_event('GOAL_SENT', goal_id=goal_id,
+                           x=candidate['x'], y=candidate['y'],
+                           path_length_m=length)
+        try:
+            future = self.nav_client.send_goal_async(nav_goal)
+            future.add_done_callback(lambda f, gid=goal_id:
+                                     self.goal_response_callback(f, gid))
+        except Exception as exc:
+            self.goal_terminal('GOAL_ERROR', goal_id,
+                               reason=f'SEND_ERROR: {exc}')
+
+    def goal_response_callback(self, future, goal_id):
+        if self.state != 'SENDING' or self.current is None or \
+                self.current['goal_id'] != goal_id:
+            return
+        try:
+            handle = future.result()
+            if not handle.accepted:
+                self.goal_terminal('GOAL_REJECTED', goal_id,
+                                   reason='NAV2_REJECTED')
+                return
+            self.goal_handle = handle
+            self.state = 'NAVIGATING'
+            self.publish_event('GOAL_ACCEPTED', goal_id=goal_id,
+                               x=self.current['x'], y=self.current['y'])
+            handle.get_result_async().add_done_callback(
+                lambda f, gid=goal_id:
+                self.navigation_result_callback(f, gid))
+        except Exception as exc:
+            self.goal_terminal('GOAL_ERROR', goal_id,
+                               reason=f'ACCEPT_ERROR: {exc}')
+
+    def navigation_result_callback(self, future, goal_id):
+        if self.state != 'NAVIGATING' or self.current is None or \
+                self.current['goal_id'] != goal_id:
+            return
+        try:
+            response = future.result()
+            if response.status == GoalStatus.STATUS_SUCCEEDED:
+                self.goal_terminal('GOAL_REACHED', goal_id,
+                                   status=int(response.status))
+            elif response.status == GoalStatus.STATUS_CANCELED:
+                self.goal_terminal('GOAL_CANCELLED', goal_id,
+                                   status=int(response.status))
+            else:
+                self.goal_terminal('GOAL_FAILED', goal_id,
+                                   status=int(response.status))
+        except Exception as exc:
+            self.goal_terminal('GOAL_ERROR', goal_id,
+                               reason=f'RESULT_ERROR: {exc}')
+
+    def goal_terminal(self, event, goal_id, **extra):
+        c = self.current
+        if c is None or c.get('goal_id') != goal_id:
+            return
+        elapsed = max(0.0, self.now_s() - c['start_time'])
+        self.publish_event(event, goal_id=goal_id, x=c['x'], y=c['y'],
+                           duration_s=elapsed, **extra)
+        block_time = (self.blacklist_success_s if event == 'GOAL_REACHED'
+                      else self.blacklist_failure_s)
+        self.blacklist_goal(c, event, block_time)
+        self.goal_handle = None
+        self.current = None
+        self.pending_candidates = []
+        self.reachable_candidates = []
+        self.state = 'IDLE'
+
+
+def main(args=None):
+    rclpy.init(args=args)
+    node = FrontierExplorer()
+    try:
+        rclpy.spin(node)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        node.destroy_node()
+        if rclpy.ok():
+            rclpy.shutdown()
+
+
+if __name__ == '__main__':
+    main()

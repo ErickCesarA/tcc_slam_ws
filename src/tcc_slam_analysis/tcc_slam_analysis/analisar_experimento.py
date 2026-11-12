@@ -905,83 +905,88 @@ def analisar_mapeamento(mapas, inicio, fim):
 # ============================================================
 
 def analisar_exploracao(eventos, inicio, fim):
+    """Métricas de exploração V1-V4, com cancelamentos sem falsa falha.
 
+    Os eventos V2+ podem conter goal_id. Para gravações legadas, o
+    pareamento conserva uma estratégia sequencial, já que o explorador
+    antigo enviava apenas uma meta por vez.
+    """
     if eventos.empty:
         return {}, pd.DataFrame()
 
-    eventos = eventos[
-        (eventos["tempo_s"] >= inicio)
-        & (eventos["tempo_s"] <= fim)
-    ].copy()
-
-    eventos["tempo_relativo_s"] = (
-        eventos["tempo_s"] - inicio
-    )
-
+    eventos = eventos[(eventos["tempo_s"] >= inicio)
+                      & (eventos["tempo_s"] <= fim)].copy()
+    eventos["tempo_relativo_s"] = eventos["tempo_s"] - inicio
     if eventos.empty:
         return {}, eventos
 
+    eventos = eventos.sort_values("tempo_s", kind="stable")
     contagem = eventos["event"].value_counts()
-
-    enviados = int(
-        contagem.get("GOAL_SENT", 0)
-    )
-
-    alcancados = int(
-        contagem.get("GOAL_REACHED", 0)
-    )
-
-    falhos = int(
-        contagem.get("GOAL_FAILED", 0)
-        + contagem.get("GOAL_ERROR", 0)
-    )
-
-    concluidos = alcancados + falhos
+    enviados = int(contagem.get("GOAL_SENT", 0))
+    alcancados = int(contagem.get("GOAL_REACHED", 0))
+    falhos = int(contagem.get("GOAL_FAILED", 0) +
+                  contagem.get("GOAL_ERROR", 0))
+    rejeitados = int(contagem.get("GOAL_REJECTED", 0))
+    cancelados = int(contagem.get("GOAL_CANCELLED", 0))
+    terminados = alcancados + falhos + rejeitados + cancelados
+    concluidos_sem_cancelamento = alcancados + falhos + rejeitados
 
     resultados = {
         "exploracao_objetivos_enviados": enviados,
         "exploracao_objetivos_alcancados": alcancados,
         "exploracao_objetivos_falhos": falhos,
-        "exploracao_objetivos_sem_resultado": max(
-            0, enviados - concluidos
-        ),
+        "exploracao_objetivos_rejeitados": rejeitados,
+        "exploracao_objetivos_cancelados": cancelados,
+        "exploracao_objetivos_sem_resultado": max(0, enviados - terminados),
         "exploracao_fronteiras_selecionadas": int(
-            contagem.get("FRONTIER_SELECTED", 0)
-        ),
+            contagem.get("FRONTIER_SELECTED", 0)),
+        "exploracao_reavaliacoes": int(contagem.get("GOAL_REEVALUATED", 0)),
+        "exploracao_trocas_meta": int(contagem.get("GOAL_SWITCHED", 0)),
+        "exploracao_solicitacoes_troca": int(
+            contagem.get("GOAL_SWITCH_REQUESTED", 0)),
+        "exploracao_trocas_abortadas": int(
+            contagem.get("GOAL_SWITCH_ABORTED", 0)),
+        # Mantém a definição histórica de sucesso entre as metas que
+        # encerraram com sucesso/falha, excluindo cancelamentos voluntários.
         "exploracao_taxa_sucesso_percentual": (
-            100 * alcancados / concluidos
-            if concluidos > 0 else np.nan
+            100 * alcancados / concluidos_sem_cancelamento
+            if concluidos_sem_cancelamento else np.nan
+        ),
+        "exploracao_taxa_alcance_sobre_enviadas_percentual": (
+            100 * alcancados / enviados if enviados else np.nan
         ),
     }
 
-    # O explorador atual envia uma meta por vez.
-    # Pareia eventos de envio e conclusão em ordem temporal.
-    inicio_meta = None
+    # Pareamento por identificador quando presente (V2-V4); fallback para
+    # mensagens antigas sem identificador. Um cancelamento é terminal,
+    # mas não é contabilizado como falha.
+    inicio_por_id = {}
+    inicio_legado = None
     duracoes = []
+    finais = {"GOAL_REACHED", "GOAL_FAILED", "GOAL_ERROR",
+              "GOAL_REJECTED", "GOAL_CANCELLED"}
+    for linha in eventos.to_dict("records"):
+        event = linha.get("event")
+        goal_id = linha.get("goal_id")
+        stamp = float(linha["tempo_s"])
+        if event == "GOAL_SENT":
+            if goal_id is None or (isinstance(goal_id, float) and
+                                   np.isnan(goal_id)):
+                inicio_legado = stamp
+            else:
+                inicio_por_id[str(goal_id)] = stamp
+        elif event in finais:
+            if goal_id is None or (isinstance(goal_id, float) and
+                                   np.isnan(goal_id)):
+                start = inicio_legado
+                inicio_legado = None
+            else:
+                start = inicio_por_id.pop(str(goal_id), None)
+            if start is not None and stamp >= start:
+                duracoes.append(stamp - start)
 
-    for linha in eventos.itertuples():
-
-        if linha.event == "GOAL_SENT":
-            inicio_meta = linha.tempo_s
-
-        elif linha.event in (
-            "GOAL_REACHED",
-            "GOAL_FAILED",
-            "GOAL_ERROR",
-        ):
-            if inicio_meta is not None:
-                duracoes.append(
-                    linha.tempo_s - inicio_meta
-                )
-                inicio_meta = None
-
-    resultados.update(
-        estatisticas(
-            duracoes,
-            "exploracao_tempo_por_objetivo_s",
-        )
-    )
-
+    resultados.update(estatisticas(duracoes,
+                                   "exploracao_tempo_por_objetivo_s"))
     return resultados, eventos
 
 
@@ -1142,14 +1147,17 @@ def gerar_relatorio_visual(pasta, resultados, tabela_odom, tabela_slam,
 
     # 6. Eventos da exploracao
     if not eventos.empty:
-        tipos = ["GOAL_SENT", "GOAL_REACHED", "GOAL_FAILED", "GOAL_ERROR"]
+        tipos = ["GOAL_SENT", "GOAL_REACHED", "GOAL_FAILED", "GOAL_ERROR",
+                 "GOAL_REJECTED", "GOAL_CANCELLED", "GOAL_SWITCHED"]
         contagens = [int((eventos["event"] == e).sum()) for e in tipos]
-        fig, ax = plt.subplots(figsize=(8, 3.8))
-        ax.bar(["Enviados", "Alcancados", "Falhos", "Erros"], contagens)
-        ax.set(title="Eventos da navegacao autonoma", ylabel="Ocorrencias")
+        fig, ax = plt.subplots(figsize=(10, 3.8))
+        ax.bar(["Enviados", "Alcançados", "Falhos", "Erros",
+                "Rejeitados", "Cancelados", "Trocas"], contagens)
+        ax.set(title="Eventos da navegação autônoma", ylabel="Ocorrências")
+        ax.tick_params(axis="x", labelrotation=20)
         ax.grid(axis="y", alpha=.25)
         salvar(fig, "eventos.png", "Objetivos de navegação",
-               "Distingue destinos enviados, alcançados e com falha. Metas sem resultado podem estar pendentes no término do experimento.")
+               "Distingue metas alcançadas, falhas, rejeições, cancelamentos voluntários e trocas de destino. Cancelamentos voluntários não são falhas.")
 
     # 7. Mapa final: sem screenshot da interface, fiel aos dados publicados
     mapa_status = "Mapa final indisponivel: o topico /map nao foi registrado."
@@ -1198,6 +1206,8 @@ def gerar_relatorio_visual(pasta, resultados, tabela_odom, tabela_slam,
         ("ATE angular SLAM", numero("slam_ATE_angular_graus_RMSE") + "°", "RMSE da orientação"),
         ("Área acrescentada", numero("mapa_variacao_area_conhecida_m2", 2) + " m²", "Variação da área conhecida"),
         ("Metas alcançadas", numero("exploracao_objetivos_alcancados", 0), "Não inclui metas pendentes"),
+        ("Trocas de destino", numero("exploracao_trocas_meta", 0), "Replanejamento dinâmico V4"),
+        ("Metas canceladas", numero("exploracao_objetivos_cancelados", 0), "Cancelamento não equivale a falha"),
         ("Execução completa", "SIM" if resultados.get("experimento_intervalo_completo") else "NÃO", "Conferência da duração requerida"),
     ]
     cards = "\n".join(
