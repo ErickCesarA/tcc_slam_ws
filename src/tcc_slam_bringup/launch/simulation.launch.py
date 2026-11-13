@@ -2,18 +2,22 @@ import os
 import sys
 
 from launch import LaunchDescription
+
 from launch.actions import (
     ExecuteProcess,
     RegisterEventHandler,
     IncludeLaunchDescription,
     LogInfo,
     EmitEvent,
+    OpaqueFunction,
+    DeclareLaunchArgument,
 )
 
 from launch.event_handlers import OnProcessExit
 from launch.events import Shutdown
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.substitutions import Command
+
+from launch.substitutions import Command, LaunchConfiguration
 
 from launch_ros.actions import Node
 from launch_ros.parameter_descriptions import ParameterValue
@@ -21,11 +25,54 @@ from launch_ros.parameter_descriptions import ParameterValue
 from ament_index_python.packages import get_package_share_directory
 
 
-def generate_launch_description():
+# ============================================================
+# 1. CADASTRO DOS MAPAS
+# ============================================================
 
-    # ============================================================
-    # 1. Diretórios
-    # ============================================================
+MAPAS = {
+    "1": {
+        "arquivo": "tcc_world.sdf",
+        "world_name": "tcc_world",
+    },
+
+    "2": {
+        "arquivo": "tcc_world_2.sdf",
+        "world_name": "tcc_world_2",
+    },
+}
+
+
+def iniciar_simulacao(context):
+
+    # ========================================================
+    # 2. IDENTIFICAR O MAPA SELECIONADO
+    # ========================================================
+
+    mapa_id = LaunchConfiguration("map").perform(context).strip()
+
+    if mapa_id not in MAPAS:
+
+        mapas_disponiveis = ", ".join(MAPAS.keys())
+
+        return [
+            LogInfo(
+                msg=(
+                    f"ERRO: mapa '{mapa_id}' nao cadastrado. "
+                    f"Mapas disponiveis: {mapas_disponiveis}"
+                )
+            ),
+            EmitEvent(
+                event=Shutdown(
+                    reason="Mapa desconhecido."
+                )
+            ),
+        ]
+
+    mapa_config = MAPAS[mapa_id]
+
+    # ========================================================
+    # 3. LOCALIZAR OS PACOTES E ARQUIVOS
+    # ========================================================
 
     description_share = get_package_share_directory(
         "tcc_slam_description"
@@ -48,8 +95,10 @@ def generate_launch_description():
     world_file = os.path.join(
         description_share,
         "worlds",
-        "tcc_world.sdf",
+        mapa_config["arquivo"],
     )
+
+    world_name = mapa_config["world_name"]
 
     slam_config = os.path.join(
         bringup_share,
@@ -63,9 +112,38 @@ def generate_launch_description():
         "readiness_monitor.py",
     )
 
-    # ============================================================
-    # 2. Gazebo
-    # ============================================================
+    # ========================================================
+    # 4. VALIDAR O ARQUIVO DO MUNDO
+    # ========================================================
+
+    if not os.path.isfile(world_file):
+
+        return [
+            LogInfo(
+                msg=f"ERRO: arquivo do mapa nao encontrado: {world_file}"
+            ),
+            EmitEvent(
+                event=Shutdown(
+                    reason="Arquivo SDF inexistente."
+                )
+            ),
+        ]
+
+    # ========================================================
+    # 5. INFORMAR O MAPA SELECIONADO
+    # ========================================================
+
+    print("\n")
+    print("=" * 60)
+    print(f" MAPA SELECIONADO: {mapa_id}")
+    print(f" ARQUIVO SDF: {mapa_config['arquivo']}")
+    print(f" WORLD GAZEBO: {world_name}")
+    print("=" * 60)
+    print("\n")
+
+    # ========================================================
+    # 6. INICIAR O GAZEBO
+    # ========================================================
 
     gazebo = ExecuteProcess(
         cmd=[
@@ -77,9 +155,9 @@ def generate_launch_description():
         output="screen",
     )
 
-    # ============================================================
-    # 3. Gerar URDF
-    # ============================================================
+    # ========================================================
+    # 7. GERAR URDF
+    # ========================================================
 
     generate_urdf = ExecuteProcess(
         cmd=[
@@ -94,9 +172,9 @@ def generate_launch_description():
         output="screen",
     )
 
-    # ============================================================
-    # 4. Robot State Publisher
-    # ============================================================
+    # ========================================================
+    # 8. ROBOT STATE PUBLISHER
+    # ========================================================
 
     robot_description = ParameterValue(
         Command([
@@ -118,9 +196,9 @@ def generate_launch_description():
         }],
     )
 
-    # ============================================================
-    # 5. Bridge dos sensores
-    # ============================================================
+    # ========================================================
+    # 9. BRIDGE DOS SENSORES
+    # ========================================================
 
     sensor_bridge = Node(
         package="ros_gz_bridge",
@@ -136,9 +214,9 @@ def generate_launch_description():
         ],
     )
 
-    # ============================================================
-    # 6. Bridge TF
-    # ============================================================
+    # ========================================================
+    # 10. BRIDGE TF
+    # ========================================================
 
     tf_bridge = Node(
         package="ros_gz_bridge",
@@ -153,9 +231,13 @@ def generate_launch_description():
         ],
     )
 
-    # ============================================================
-    # 7. Ground Truth
-    # ============================================================
+    # ========================================================
+    # 11. GROUND TRUTH
+    # ========================================================
+
+    ground_truth_topic = (
+        f"/world/{world_name}/pose/info"
+    )
 
     ground_truth_odom_node = Node(
         package="tcc_slam_ground_truth",
@@ -164,16 +246,16 @@ def generate_launch_description():
         output="screen",
         parameters=[
             {"use_sim_time": True},
-            {"gazebo_topic": "/world/tcc_world/pose/info"},
+            {"gazebo_topic": ground_truth_topic},
             {"model_name": "tcc_robot"},
             {"world_frame": "world"},
             {"child_frame": "tcc_robot"},
         ],
     )
 
-    # ============================================================
-    # 8. Inserir robô
-    # ============================================================
+    # ========================================================
+    # 12. INSERIR O ROBÔ
+    # ========================================================
 
     spawn_robot = Node(
         package="ros_gz_sim",
@@ -182,7 +264,7 @@ def generate_launch_description():
         output="screen",
         arguments=[
             "-world",
-            "tcc_world",
+            world_name,
             "-file",
             "/tmp/tcc_robot.urdf",
             "-name",
@@ -196,9 +278,9 @@ def generate_launch_description():
         ],
     )
 
-    # ============================================================
-    # 9. Monitor de prontidão pré-SLAM
-    # ============================================================
+    # ========================================================
+    # 13. MONITOR DE PRONTIDAO PRE-SLAM
+    # ========================================================
 
     pre_slam_monitor = ExecuteProcess(
         cmd=[
@@ -210,9 +292,9 @@ def generate_launch_description():
         output="screen",
     )
 
-    # ============================================================
-    # 10. SLAM Toolbox
-    # ============================================================
+    # ========================================================
+    # 14. SLAM TOOLBOX
+    # ========================================================
 
     slam_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
@@ -228,9 +310,9 @@ def generate_launch_description():
         }.items(),
     )
 
-    # ============================================================
-    # 11. RViz2
-    # ============================================================
+    # ========================================================
+    # 15. RVIZ2
+    # ========================================================
 
     rviz = Node(
         package="rviz2",
@@ -242,13 +324,14 @@ def generate_launch_description():
         }],
     )
 
-    # ============================================================
-    # 12. Funções de transição
-    # ============================================================
+    # ========================================================
+    # 16. FUNCOES DE TRANSICAO
+    # ========================================================
 
     def apos_gerar_urdf(event, context):
 
         if event.returncode != 0:
+
             return [
                 EmitEvent(
                     event=Shutdown(
@@ -258,24 +341,27 @@ def generate_launch_description():
             ]
 
         return [
-            LogInfo(msg="URDF gerado. Inserindo robô..."),
+            LogInfo(
+                msg="URDF gerado. Inserindo robo..."
+            ),
             spawn_robot,
         ]
 
     def apos_inserir_robo(event, context):
 
         if event.returncode != 0:
+
             return [
                 EmitEvent(
                     event=Shutdown(
-                        reason="Falha ao inserir o robô."
+                        reason="Falha ao inserir o robo."
                     )
                 )
             ]
 
         return [
             LogInfo(
-                msg="Robô inserido. Verificando sensores e TF..."
+                msg="Robo inserido. Verificando sensores e TF..."
             ),
             pre_slam_monitor,
         ]
@@ -283,25 +369,26 @@ def generate_launch_description():
     def apos_monitor_pre_slam(event, context):
 
         if event.returncode != 0:
+
             return [
                 EmitEvent(
                     event=Shutdown(
-                        reason="Monitor pré-SLAM terminou com erro."
+                        reason="Monitor pre-SLAM terminou com erro."
                     )
                 )
             ]
 
         return [
             LogInfo(
-                msg="Sensores e TF disponíveis. Iniciando SLAM..."
+                msg="Sensores e TF disponiveis. Inicializacao concluida."
             ),
-            #slam_launch,
+            # slam_launch e iniciado pelo navigation.launch.py
             rviz,
         ]
 
-    # ============================================================
-    # 13. Eventos
-    # ============================================================
+    # ========================================================
+    # 17. EVENTOS
+    # ========================================================
 
     spawn_after_xacro = RegisterEventHandler(
         OnProcessExit(
@@ -324,11 +411,15 @@ def generate_launch_description():
         )
     )
 
-    # ============================================================
-    # 14. Launch Description
-    # ============================================================
+    # ========================================================
+    # 18. INICIALIZACAO DA SIMULACAO
+    # ========================================================
 
-    return LaunchDescription([
+    return [
+
+        LogInfo(
+            msg=f"Iniciando simulacao com o mapa {mapa_id}: {world_name}"
+        ),
 
         gazebo,
 
@@ -347,5 +438,26 @@ def generate_launch_description():
         slam_after_monitor,
 
         generate_urdf,
+
+    ]
+
+
+# ============================================================
+# 19. LAUNCH DESCRIPTION
+# ============================================================
+
+def generate_launch_description():
+
+    return LaunchDescription([
+
+        DeclareLaunchArgument(
+            "map",
+            default_value="1",
+            description="Identificador do mapa a ser utilizado",
+        ),
+
+        OpaqueFunction(
+            function=iniciar_simulacao
+        ),
 
     ])

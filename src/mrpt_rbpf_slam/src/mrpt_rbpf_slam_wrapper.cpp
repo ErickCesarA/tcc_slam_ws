@@ -181,8 +181,11 @@ bool PFslamWrapper::waitForTransform(
   try {
                 // Convert rclcpp::Duration to tf2::Duration (std::chrono::nanoseconds)
     auto tf_timeout = std::chrono::nanoseconds(timeout.nanoseconds());
+    // Utilizar a pose odometrica no instante da observacao LiDAR.
+    const auto tf_time = tf2::TimePoint(
+      std::chrono::nanoseconds(time.nanoseconds()));
     transform = tf_buffer_->lookupTransform(
-                        target_frame, source_frame, tf2::TimePointZero, tf_timeout);
+      target_frame, source_frame, tf_time, tf_timeout);
   } catch (const tf2::TransformException & e) {
     RCLCPP_WARN(
                         this->get_logger(),
@@ -216,6 +219,12 @@ void PFslamWrapper::laserCallback(const sensor_msgs::msg::LaserScan::SharedPtr m
     sensory_frame_ = CSensoryFrame::Create();
     CObservationOdometry::Ptr odometry;
     odometryForCallback(odometry, msg->header);
+    if (!odometry) {
+      RCLCPP_WARN_THROTTLE(
+        this->get_logger(), *this->get_clock(), 2000,
+        "[RBPF] Scan descartado: TF odom->base_link indisponivel no timestamp.");
+      return;
+    }
 
     CObservation::Ptr obs = CObservation::Ptr(laser);
     sensory_frame_->insert(obs);

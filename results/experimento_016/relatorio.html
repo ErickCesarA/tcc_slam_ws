@@ -1,0 +1,36 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Experimento SLAM — GRAPH</title>
+    <style>
+    :root {font-family:system-ui,Arial,sans-serif;color:#192438;background:#f3f6fb}
+    body {margin:0}header {background:#10233f;color:white;padding:42px max(24px,calc((100vw - 1100px)/2))}
+    main {max-width:1100px;margin:auto;padding:24px}
+    .grid {display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:13px}
+    .card,section {background:white;border-radius:12px;padding:18px;box-shadow:0 2px 10px #10233f14}
+    .card-title {font-weight:700;color:#40526a}.number {font-size:1.7rem;font-weight:800;margin:8px 0}
+    small,p {color:#56657a;line-height:1.55}section {margin-top:22px}
+    section img {width:100%;height:auto;display:block;object-fit:contain}
+    h1 {margin:0 0 8px}h2 {font-size:1.25rem}footer {padding:24px 0;color:#53677c}
+    </style></head><body>
+    <header><h1>Relatório visual de experimento SLAM</h1>
+    <div>Método: GRAPH · Início simulado absoluto: 74.03 s
+    · Duração solicitada: 180.0 s</div></header>
+    <main><div class="grid"><div class="card"><div class="card-title">Método</div><div class="number">GRAPH</div><small>Algoritmo declarado no experimento</small></div>
+<div class="card"><div class="card-title">Duração analisada</div><div class="number">180.0 s</div><small>Tempo efetivo disponível</small></div>
+<div class="card"><div class="card-title">ATE SLAM</div><div class="number">0.021 m</div><small>RMSE translacional; menor é melhor</small></div>
+<div class="card"><div class="card-title">ATE odometria</div><div class="number">0.386 m</div><small>Referência de comparação</small></div>
+<div class="card"><div class="card-title">ATE angular SLAM</div><div class="number">0.417°</div><small>RMSE da orientação</small></div>
+<div class="card"><div class="card-title">Área acrescentada</div><div class="number">91.38 m²</div><small>Variação da área conhecida</small></div>
+<div class="card"><div class="card-title">Metas alcançadas</div><div class="number">6</div><small>Não inclui metas pendentes</small></div>
+<div class="card"><div class="card-title">Trocas de destino</div><div class="number">0</div><small>Replanejamento dinâmico V4</small></div>
+<div class="card"><div class="card-title">Metas canceladas</div><div class="number">0</div><small>Cancelamento não equivale a falha</small></div>
+<div class="card"><div class="card-title">Execução completa</div><div class="number">SIM</div><small>Conferência da duração requerida</small></div></div>
+    <section><h2>Como interpretar</h2><p>A estimativa SLAM é reconstruída de map→odom→base_link. As trajetórias são comparadas após alinhamento inicial SE(2). O mapa final provém da mensagem /map e pode diferir da aparência do RViz2 se o RViz2 estiver exibindo outro Fixed Frame, camadas ou marcadores. A ausência de uma métrica não deve ser interpretada como valor zero.</p><p>Último mapa registrado em t=247.30 s (relógio absoluto); referencial map.</p></section>
+    <section><h2>Trajetórias</h2><p>Compara o percurso de referência com a odometria e a estimativa global do método SLAM, após alinhamento inicial SE(2).</p><img src="graficos/trajetorias.png" alt="Trajetórias"></section>
+<section><h2>Evolução do erro de posição</h2><p>Indica em quais instantes a estimativa se afasta da referência; valores menores são preferíveis.</p><img src="graficos/erro_posicao.png" alt="Evolução do erro de posição"></section>
+<section><h2>Evolução do erro angular</h2><p>Mostra desvios de orientação que podem influenciar a projeção de varreduras e a navegação.</p><img src="graficos/erro_angular.png" alt="Evolução do erro angular"></section>
+<section><h2>Erro relativo de trajetória (RPE)</h2><p>Compara a precisão dos deslocamentos relativos em janelas de 1, 5 e 10 segundos. Valores menores indicam maior consistência local.</p><img src="graficos/rpe_translacao.png" alt="Erro relativo de trajetória (RPE)"></section>
+<section><h2>Evolução do mapeamento</h2><p>A área conhecida indica quanto do ambiente foi observado. A curva não mede diretamente a precisão geométrica do mapa.</p><img src="graficos/evolucao_mapa.png" alt="Evolução do mapeamento"></section>
+<section><h2>Objetivos de navegação</h2><p>Distingue metas alcançadas, falhas, rejeições, cancelamentos voluntários e trocas de destino. Cancelamentos voluntários não são falhas.</p><img src="graficos/eventos.png" alt="Objetivos de navegação"></section>
+<section><h2>Mapa de ocupação final</h2><p>Imagem gerada da última mensagem /map disponível na rosbag: branco = livre, preto = ocupado, cinza = desconhecido. Não é uma captura da interface do RViz2.</p><img src="graficos/mapa_final.png" alt="Mapa de ocupação final"></section><footer>Relatório gerado localmente a partir dos dados da rosbag. Dados tabulares disponíveis nos arquivos CSV do mesmo diretório.</footer>
+    </main></body></html>

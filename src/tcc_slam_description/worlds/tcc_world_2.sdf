@@ -1,0 +1,849 @@
+<?xml version='1.0' encoding='utf-8'?>
+<sdf version="1.9">
+  <world name="tcc_world_2">
+    <gravity>0 0 -9.81</gravity>
+    <physics name="physics_1ms" type="ignored">
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>1.0</real_time_factor>
+    </physics>
+    <plugin filename="gz-sim-physics-system" name="gz::sim::systems::Physics" />
+    <plugin filename="gz-sim-user-commands-system" name="gz::sim::systems::UserCommands" />
+    <plugin filename="gz-sim-scene-broadcaster-system" name="gz::sim::systems::SceneBroadcaster" />
+    <plugin filename="gz-sim-sensors-system" name="gz::sim::systems::Sensors">
+      <render_engine>ogre2</render_engine>
+    </plugin>
+    <plugin filename="gz-sim-imu-system" name="gz::sim::systems::Imu" />
+    <light name="sol" type="directional">
+      <cast_shadows>true</cast_shadows>
+      <pose>0 0 9 0 0 0</pose>
+      <diffuse>0.85 0.85 0.85 1</diffuse>
+      <specular>0.25 0.25 0.25 1</specular>
+      <direction>-0.4 0.2 -0.9</direction>
+    </light>
+    <model name="piso">
+      <static>true</static>
+      <pose>0.00000 0.00000 -0.05000 0 0 0.00000000</pose>
+      <link name="body">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>18.00000 14.00000 0.10000</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>18.00000 14.00000 0.10000</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.72 0.74 0.75 1</ambient>
+            <diffuse>0.72 0.74 0.75 1</diffuse>
+            <specular>0.08 0.08 0.08 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="bloco_superior_esquerdo_parede_01">
+      <static>true</static>
+      <pose>-5.72000 5.34000 0.45000 0 0 0.01723967</pose>
+      <link name="body">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>2.43034 0.11000 0.90000</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>2.43034 0.11000 0.90000</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.13 0.18 0.20 1</ambient>
+            <diffuse>0.13 0.18 0.20 1</diffuse>
+            <specular>0.08 0.08 0.08 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="bloco_superior_esquerdo_parede_02">
+      <static>true</static>
+      <pose>-4.56000 4.92000 0.45000 0 0 -1.57079633</pose>
+      <link name="body">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>0.99000 0.11000 0.90000</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.99000 0.11000 0.90000</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.13 0.18 0.20 1</ambient>
+            <diffuse>0.13 0.18 0.20 1</diffuse>
+            <specular>0.08 0.08 0.08 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="bloco_superior_esquerdo_parede_03">
+      <static>true</static>
+      <pose>-5.70000 4.46000 0.45000 0 0 -3.12405059</pose>
+      <link name="body">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>2.39035 0.11000 0.90000</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>2.39035 0.11000 0.90000</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.13 0.18 0.20 1</ambient>
+            <diffuse>0.13 0.18 0.20 1</diffuse>
+            <specular>0.08 0.08 0.08 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="bloco_superior_esquerdo_parede_04">
+      <static>true</static>
+      <pose>-6.86000 4.88000 0.45000 0 0 1.61621961</pose>
+      <link name="body">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>0.99091 0.11000 0.90000</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.99091 0.11000 0.90000</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.13 0.18 0.20 1</ambient>
+            <diffuse>0.13 0.18 0.20 1</diffuse>
+            <specular>0.08 0.08 0.08 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="estrutura_superior_parede_01">
+      <static>true</static>
+      <pose>-2.92000 2.42000 0.45000 0 0 -0.01947806</pose>
+      <link name="body">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>6.27117 0.11000 0.90000</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>6.27117 0.11000 0.90000</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.13 0.18 0.20 1</ambient>
+            <diffuse>0.13 0.18 0.20 1</diffuse>
+            <specular>0.08 0.08 0.08 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="estrutura_superior_parede_02">
+      <static>true</static>
+      <pose>0.18000 3.00000 0.45000 0 0 1.53955649</pose>
+      <link name="body">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>1.39062 0.11000 0.90000</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>1.39062 0.11000 0.90000</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.13 0.18 0.20 1</ambient>
+            <diffuse>0.13 0.18 0.20 1</diffuse>
+            <specular>0.08 0.08 0.08 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="estrutura_superior_parede_03">
+      <static>true</static>
+      <pose>1.74000 3.64000 0.45000 0 0 0.00000000</pose>
+      <link name="body">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>3.19000 0.11000 0.90000</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>3.19000 0.11000 0.90000</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.13 0.18 0.20 1</ambient>
+            <diffuse>0.13 0.18 0.20 1</diffuse>
+            <specular>0.08 0.08 0.08 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="estrutura_superior_parede_04">
+      <static>true</static>
+      <pose>3.28000 4.12000 0.45000 0 0 1.57079633</pose>
+      <link name="body">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>1.07000 0.11000 0.90000</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>1.07000 0.11000 0.90000</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.13 0.18 0.20 1</ambient>
+            <diffuse>0.13 0.18 0.20 1</diffuse>
+            <specular>0.08 0.08 0.08 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="estrutura_superior_parede_05">
+      <static>true</static>
+      <pose>3.72000 4.60000 0.45000 0 0 0.00000000</pose>
+      <link name="body">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>0.99000 0.11000 0.90000</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.99000 0.11000 0.90000</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.13 0.18 0.20 1</ambient>
+            <diffuse>0.13 0.18 0.20 1</diffuse>
+            <specular>0.08 0.08 0.08 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="estrutura_superior_parede_06">
+      <static>true</static>
+      <pose>4.14000 3.66000 0.45000 0 0 -1.59206971</pose>
+      <link name="body">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>1.99043 0.11000 0.90000</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>1.99043 0.11000 0.90000</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.13 0.18 0.20 1</ambient>
+            <diffuse>0.13 0.18 0.20 1</diffuse>
+            <specular>0.08 0.08 0.08 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="estrutura_superior_parede_07">
+      <static>true</static>
+      <pose>2.70000 2.72000 0.45000 0 0 3.14159265</pose>
+      <link name="body">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>2.95000 0.11000 0.90000</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>2.95000 0.11000 0.90000</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.13 0.18 0.20 1</ambient>
+            <diffuse>0.13 0.18 0.20 1</diffuse>
+            <specular>0.08 0.08 0.08 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="estrutura_superior_parede_08">
+      <static>true</static>
+      <pose>1.28000 2.08000 0.45000 0 0 -1.57079633</pose>
+      <link name="body">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>1.39000 0.11000 0.90000</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>1.39000 0.11000 0.90000</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.13 0.18 0.20 1</ambient>
+            <diffuse>0.13 0.18 0.20 1</diffuse>
+            <specular>0.08 0.08 0.08 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="estrutura_superior_parede_09">
+      <static>true</static>
+      <pose>-1.92000 1.50000 0.45000 0 0 3.12284485</pose>
+      <link name="body">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>6.51112 0.11000 0.90000</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>6.51112 0.11000 0.90000</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.13 0.18 0.20 1</ambient>
+            <diffuse>0.13 0.18 0.20 1</diffuse>
+            <specular>0.08 0.08 0.08 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="estrutura_superior_parede_10">
+      <static>true</static>
+      <pose>-5.14000 0.46000 0.45000 0 0 -1.58897614</pose>
+      <link name="body">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>2.31036 0.11000 0.90000</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>2.31036 0.11000 0.90000</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.13 0.18 0.20 1</ambient>
+            <diffuse>0.13 0.18 0.20 1</diffuse>
+            <specular>0.08 0.08 0.08 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="estrutura_superior_parede_11">
+      <static>true</static>
+      <pose>-5.54000 -0.64000 0.45000 0 0 3.14159265</pose>
+      <link name="body">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>0.87000 0.11000 0.90000</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.87000 0.11000 0.90000</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.13 0.18 0.20 1</ambient>
+            <diffuse>0.13 0.18 0.20 1</diffuse>
+            <specular>0.08 0.08 0.08 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="estrutura_superior_parede_12">
+      <static>true</static>
+      <pose>-5.96000 0.92000 0.45000 0 0 1.59643174</pose>
+      <link name="body">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>3.23103 0.11000 0.90000</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>3.23103 0.11000 0.90000</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.13 0.18 0.20 1</ambient>
+            <diffuse>0.13 0.18 0.20 1</diffuse>
+            <specular>0.08 0.08 0.08 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="estrutura_inferior_parede_01">
+      <static>true</static>
+      <pose>-3.18000 -2.52000 0.45000 0 0 0.00000000</pose>
+      <link name="body">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>6.23000 0.11000 0.90000</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>6.23000 0.11000 0.90000</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.13 0.18 0.20 1</ambient>
+            <diffuse>0.13 0.18 0.20 1</diffuse>
+            <specular>0.08 0.08 0.08 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="estrutura_inferior_parede_02">
+      <static>true</static>
+      <pose>-0.12000 -3.08000 0.45000 0 0 -1.57079633</pose>
+      <link name="body">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>1.23000 0.11000 0.90000</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>1.23000 0.11000 0.90000</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.13 0.18 0.20 1</ambient>
+            <diffuse>0.13 0.18 0.20 1</diffuse>
+            <specular>0.08 0.08 0.08 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="estrutura_inferior_parede_03">
+      <static>true</static>
+      <pose>1.58000 -3.64000 0.45000 0 0 0.00000000</pose>
+      <link name="body">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>3.51000 0.11000 0.90000</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>3.51000 0.11000 0.90000</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.13 0.18 0.20 1</ambient>
+            <diffuse>0.13 0.18 0.20 1</diffuse>
+            <specular>0.08 0.08 0.08 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="estrutura_inferior_parede_04">
+      <static>true</static>
+      <pose>3.28000 -2.12000 0.45000 0 0 1.57079633</pose>
+      <link name="body">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>3.15000 0.11000 0.90000</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>3.15000 0.11000 0.90000</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.13 0.18 0.20 1</ambient>
+            <diffuse>0.13 0.18 0.20 1</diffuse>
+            <specular>0.08 0.08 0.08 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="estrutura_inferior_parede_05">
+      <static>true</static>
+      <pose>4.98000 -0.56000 0.45000 0 0 0.02352507</pose>
+      <link name="body">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>3.51094 0.11000 0.90000</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>3.51094 0.11000 0.90000</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.13 0.18 0.20 1</ambient>
+            <diffuse>0.13 0.18 0.20 1</diffuse>
+            <specular>0.08 0.08 0.08 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="estrutura_inferior_parede_06">
+      <static>true</static>
+      <pose>6.68000 -1.00000 0.45000 0 0 -1.57079633</pose>
+      <link name="body">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>1.07000 0.11000 0.90000</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>1.07000 0.11000 0.90000</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.13 0.18 0.20 1</ambient>
+            <diffuse>0.13 0.18 0.20 1</diffuse>
+            <specular>0.08 0.08 0.08 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="estrutura_inferior_parede_07">
+      <static>true</static>
+      <pose>5.50000 -1.50000 0.45000 0 0 -3.12464512</pose>
+      <link name="body">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>2.47034 0.11000 0.90000</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>2.47034 0.11000 0.90000</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.13 0.18 0.20 1</ambient>
+            <diffuse>0.13 0.18 0.20 1</diffuse>
+            <specular>0.08 0.08 0.08 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="estrutura_inferior_parede_08">
+      <static>true</static>
+      <pose>4.32000 -2.96000 0.45000 0 0 -1.57079633</pose>
+      <link name="body">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>2.99000 0.11000 0.90000</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>2.99000 0.11000 0.90000</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.13 0.18 0.20 1</ambient>
+            <diffuse>0.13 0.18 0.20 1</diffuse>
+            <specular>0.08 0.08 0.08 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="estrutura_inferior_parede_09">
+      <static>true</static>
+      <pose>1.50000 -4.42000 0.45000 0 0 -3.13450057</pose>
+      <link name="body">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>5.75014 0.11000 0.90000</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>5.75014 0.11000 0.90000</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.13 0.18 0.20 1</ambient>
+            <diffuse>0.13 0.18 0.20 1</diffuse>
+            <specular>0.08 0.08 0.08 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="estrutura_inferior_parede_10">
+      <static>true</static>
+      <pose>-1.36000 -3.88000 0.45000 0 0 1.64210379</pose>
+      <link name="body">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>1.23285 0.11000 0.90000</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>1.23285 0.11000 0.90000</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.13 0.18 0.20 1</ambient>
+            <diffuse>0.13 0.18 0.20 1</diffuse>
+            <specular>0.08 0.08 0.08 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="estrutura_inferior_parede_11">
+      <static>true</static>
+      <pose>-3.80000 -3.36000 0.45000 0 0 -3.12492753</pose>
+      <link name="body">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>4.91067 0.11000 0.90000</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>4.91067 0.11000 0.90000</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.13 0.18 0.20 1</ambient>
+            <diffuse>0.13 0.18 0.20 1</diffuse>
+            <specular>0.08 0.08 0.08 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="estrutura_inferior_parede_12">
+      <static>true</static>
+      <pose>-6.22000 -2.96000 0.45000 0 0 1.61621961</pose>
+      <link name="body">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>0.99091 0.11000 0.90000</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.99091 0.11000 0.90000</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.13 0.18 0.20 1</ambient>
+            <diffuse>0.13 0.18 0.20 1</diffuse>
+            <specular>0.08 0.08 0.08 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="limite_norte">
+      <static>true</static>
+      <pose>0.00000 6.25000 0.45000 0 0 0.00000000</pose>
+      <link name="body">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>16.61000 0.11000 0.90000</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>16.61000 0.11000 0.90000</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.40 0.43 0.46 1</ambient>
+            <diffuse>0.40 0.43 0.46 1</diffuse>
+            <specular>0.08 0.08 0.08 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="limite_sul">
+      <static>true</static>
+      <pose>0.00000 -6.25000 0.45000 0 0 0.00000000</pose>
+      <link name="body">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>16.61000 0.11000 0.90000</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>16.61000 0.11000 0.90000</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.40 0.43 0.46 1</ambient>
+            <diffuse>0.40 0.43 0.46 1</diffuse>
+            <specular>0.08 0.08 0.08 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="limite_leste">
+      <static>true</static>
+      <pose>8.25000 0.00000 0.45000 0 0 1.57079633</pose>
+      <link name="body">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>12.61000 0.11000 0.90000</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>12.61000 0.11000 0.90000</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.40 0.43 0.46 1</ambient>
+            <diffuse>0.40 0.43 0.46 1</diffuse>
+            <specular>0.08 0.08 0.08 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="limite_oeste">
+      <static>true</static>
+      <pose>-8.25000 0.00000 0.45000 0 0 1.57079633</pose>
+      <link name="body">
+        <collision name="collision">
+          <geometry>
+            <box>
+              <size>12.61000 0.11000 0.90000</size>
+            </box>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>12.61000 0.11000 0.90000</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>0.40 0.43 0.46 1</ambient>
+            <diffuse>0.40 0.43 0.46 1</diffuse>
+            <specular>0.08 0.08 0.08 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+  </world>
+</sdf>

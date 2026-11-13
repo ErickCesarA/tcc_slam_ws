@@ -523,8 +523,30 @@ bool CGraphSlamHandler_ROS<GRAPH_T>::usePublishersBroadcasters()
         // make sure that we have received odometry information in the first
         // place...
         // the corresponding field would be initialized
-  if (!m_anchor_odom_transform.child_frame_id.empty()) {
-    m_broadcaster->sendTransform(m_anchor_odom_transform);
+  // A odometria recebida e T_odom_base, NAO T_map_odom.
+  // Publicar T_map_odom = T_map_base * inversa(T_odom_base).
+  // A pose global e obtida do GraphSLAM; nenhum parametro do grafo e alterado.
+  if (!m_first_time_in_sniff_odom) {
+    const auto & odom_pose = m_anchor_odom_transform.transform;
+    const auto & q = odom_pose.rotation;
+    const double odom_yaw = std::atan2(
+      2.0 * (q.w * q.z + q.x * q.y),
+      1.0 - 2.0 * (q.y * q.y + q.z * q.z));
+    const double yaw_correction = mrpt_pose.phi() - odom_yaw;
+    const double c = std::cos(yaw_correction);
+    const double s = std::sin(yaw_correction);
+
+    geometry_msgs::msg::TransformStamped map_to_odom;
+    map_to_odom.header.stamp = timestamp;
+    map_to_odom.header.frame_id = m_anchor_frame_id;
+    map_to_odom.child_frame_id = m_odom_frame_id;
+    map_to_odom.transform.translation.x =
+      mrpt_pose.x() - c * odom_pose.translation.x + s * odom_pose.translation.y;
+    map_to_odom.transform.translation.y =
+      mrpt_pose.y() - s * odom_pose.translation.x - c * odom_pose.translation.y;
+    map_to_odom.transform.translation.z = -odom_pose.translation.z;
+    map_to_odom.transform.rotation = createQuaternionMsgFromYaw(yaw_correction);
+    m_broadcaster->sendTransform(map_to_odom);
   }
 
         // set an arrow indicating the current orientation of the robot
@@ -723,7 +745,8 @@ void CGraphSlamHandler_ROS<GRAPH_T>::sniffOdom(
                 mrpt::system::LVL_DEBUG,
                 "sniffOdom: Received an odometry msg. Converting it to MRPT format...");
 
-        // update the odometry frame with regards to the anchor
+        // Cache da pose T_odom_base recebida. O TF global sera calculado
+        // em usePublishersBroadcasters() a partir da pose estimada pelo grafo.
   {
                 // header
     m_anchor_odom_transform.header.frame_id = m_anchor_frame_id;

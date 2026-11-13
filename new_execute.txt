@@ -1,17 +1,63 @@
-Terminal 1 — Iniciar simulação e navegação:
+Iniciar simulação (caso necessario):
 
 source /opt/ros/lyrical/setup.bash
 source ~/tcc_slam_ws/install/setup.bash
 
-ros2 launch tcc_slam_bringup navigation.launch.py
+ros2 launch tcc_slam_bringup simulation.launch.py
 
-Terminal 2 — Executar experimento:
+Iniciar simulaçao, navegaçao e metodo:
+source /opt/ros/lyrical/setup.bash
+source ~/tcc_slam_ws/install/setup.bash
+
+GrapgSLAM (Toolbox):
+ros2 launch tcc_slam_bringup navigation.launch.py \
+  map:=
+  slam_method:=toolbox
+  
+GraphSLAM (MRPT):
+ros2 launch tcc_slam_bringup navigation.launch.py \
+  map:=
+  slam_method:=graph
+
+RBPF-SLAM:
+ros2 launch tcc_slam_bringup navigation.launch.py \
+  map:=
+  slam_method:=rbpf
+
+EKF-SLAM:
+ros2 launch tcc_slam_bringup navigation.launch.py \
+  map:=
+  slam_method:=ekf
+  
+Executar experimento:
 
 source /opt/ros/lyrical/setup.bash
 source ~/tcc_slam_ws/install/setup.bash
 
-python3 ~/tcc_slam_ws/executar_experimento.py x --duracao 600
+python3 ~/tcc_slam_ws/executar_experimento.py x \
+  --duracao 180 \
+  --metodo y
 
-Terminal 3 — Analisar resultados:
+  toolbox
+  graph
+  rbpf
+  ekf
+
+Visualizar Relatorio:
+firefox ~/tcc_slam_ws/results/experimento_0x/relatorio.html
+
+Comparar Experimentos:
+python3 ~/tcc_slam_ws/comparar_experimento.py x y z w
+
+Analisar resultados (caso necessario):
 
 ~/tcc_slam_ws/analisar_experimento.sh x
+
+
+teleoperaçao (caso necessario):
+source /opt/ros/lyrical/setup.bash
+source ~/tcc_slam_ws/install/setup.bash
+
+ros2 run teleop_twist_keyboard teleop_twist_keyboard \
+  --ros-args --remap cmd_vel:=/cmd_vel
+

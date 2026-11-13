@@ -44,6 +44,8 @@ def generate_launch_description():
 
     slam_method = LaunchConfiguration("slam_method")
 
+    map_id = LaunchConfiguration("map")
+
     bringup_share = get_package_share_directory(
         "tcc_slam_bringup"
     )
@@ -75,6 +77,9 @@ def generate_launch_description():
         PythonLaunchDescriptionSource(
             os.path.join(bringup_share, "launch", "simulation.launch.py")
         ),
+        launch_arguments={
+            "map": map_id,
+        }.items(),
     )
 
     toolbox_launch = IncludeLaunchDescription(
@@ -362,6 +367,12 @@ def generate_launch_description():
             "slam_method",
             default_value="toolbox",
             description="Metodo de SLAM: toolbox, graph, rbpf ou ekf",
+        ),
+
+        DeclareLaunchArgument(
+            "map",
+            default_value="1",
+            description="Mapa utilizado na simulacao",
         ),
 
         # --------------------------------------------------------
