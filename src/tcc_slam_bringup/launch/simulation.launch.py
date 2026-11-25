@@ -30,14 +30,25 @@ from ament_index_python.packages import get_package_share_directory
 # ============================================================
 
 MAPAS = {
-    "1": {
-        "arquivo": "tcc_world.sdf",
-        "world_name": "tcc_world",
+    '1': {
+        'arquivo': 'tcc_world.sdf',
+        'world_name': 'tcc_world',
     },
-
-    "2": {
-        "arquivo": "tcc_world_2.sdf",
-        "world_name": "tcc_world_2",
+    '2': {
+        'arquivo': 'tcc_world_2.sdf',
+        'world_name': 'tcc_world_2',
+    },
+    '3': {
+        'arquivo': 'tcc_world_3.sdf',
+        'world_name': 'tcc_world_3',
+    },
+    '4': {
+        'arquivo': 'tcc_world_4.sdf',
+        'world_name': 'tcc_world_4',
+    },
+    '5': {
+        'arquivo': 'tcc_world_5.sdf',
+        'world_name': 'tcc_world_5',
     },
 }
 

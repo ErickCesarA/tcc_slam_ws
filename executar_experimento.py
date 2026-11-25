@@ -2,11 +2,16 @@
 
 import argparse
 import json
+import hashlib
 import os
+import math
+import xml.etree.ElementTree as ET
 import signal
 import subprocess
 import time
 from pathlib import Path
+
+from experimento_paths import nome_experimento, checar_id_disponivel
 
 import rclpy
 from rclpy.node import Node
@@ -197,19 +202,64 @@ def aguardar_nav2(node, timeout=120):
     return False
 
 
-def executar(numero, duracao, metodo):
+def registrar_proveniencia(workspace, sdf):
+    """Registra referências da implementação sem depender do ROS.
+
+    Os hashes documentam os arquivos em src/; precisam corresponder ao
+    código compilado em install/ para representar a execução efetiva.
+    """
+    caminhos = {
+        'mundo_sdf': sdf,
+        'modelo_xacro': workspace / 'src/tcc_slam_description/urdf/tcc_robot.urdf.xacro',
+        'nav2_yaml': workspace / 'src/tcc_slam_bringup/config/nav2_params.yaml',
+        'frontier_explorer_py': workspace / 'src/tcc_slam_exploration/tcc_slam_exploration/frontier_explorer.py',
+    }
+    hashes = {
+        nome: hashlib.sha256(arquivo.read_bytes()).hexdigest()
+        for nome, arquivo in caminhos.items() if arquivo.is_file()
+    }
+    git_rev = None
+    git_dirty = None
+    try:
+        rev = subprocess.run(['git','-C',str(workspace),'rev-parse','HEAD'],
+                             capture_output=True,text=True,check=True,timeout=5)
+        git_rev = rev.stdout.strip()
+        estado = subprocess.run(['git','-C',str(workspace),'status','--porcelain'],
+                                capture_output=True,text=True,check=True,timeout=5)
+        git_dirty = bool(estado.stdout.strip())
+    except (OSError, subprocess.SubprocessError):
+        pass
+    return {'git_commit': git_rev, 'git_alteracoes_nao_commitadas': git_dirty,
+            'hashes_configuracao_sha256': hashes}
+
+
+def executar(numero, duracao, metodo, mapa):
 
     workspace = Path.home() / "tcc_slam_ws"
 
     identificador = f"{numero:03d}"
+    checar_id_disponivel(workspace, numero)
+    pasta_nome = nome_experimento(numero, metodo, duracao, mapa)
 
     print(f"Metodo de SLAM informado: {metodo}")
     print(f"Duracao planejada: {duracao:g} s simulados")
+    print(f"Mapa declarado: {mapa}")
+    print(f"Pasta do experimento: {pasta_nome}")
+
+    # Confere o arquivo de cenário cadastrado (não verifica o Gazebo em execução).
+    nome_sdf = "tcc_world.sdf" if mapa == 1 else f"tcc_world_{mapa}.sdf"
+    sdf = workspace / "src" / "tcc_slam_description" / "worlds" / nome_sdf
+    if not sdf.is_file():
+        raise FileNotFoundError(f"Arquivo SDF do mapa {mapa} não encontrado: {sdf}")
+    elem = ET.parse(sdf).find("world")
+    if elem is None or not elem.get("name"):
+        raise ValueError(f"SDF sem nome interno do mundo: {sdf}")
+    world_name = elem.get("name")
 
     pasta = (
         workspace
         / "bags"
-        / f"experimento_{identificador}"
+        / pasta_nome
         / "dados"
     )
 
@@ -272,6 +322,12 @@ def executar(numero, duracao, metodo):
                 "experimento": identificador,
                 "slam_method": metodo,
                 "duracao_configurada_s": duracao,
+                "map_id": mapa,
+                "world_name": world_name,
+                "modo_experimento": "fronteiras",
+                "perfil_sensores": "nominal",
+                "nome_pasta": pasta_nome,
+                **registrar_proveniencia(workspace, sdf),
             }, ensure_ascii=False, indent=2) + "\n",
             encoding="utf-8",
         )
@@ -466,6 +522,13 @@ def main():
         default=600.0,
     )
 
+    parser.add_argument(
+        "--mapa",
+        type=int,
+        required=True,
+        help="ID do mapa ativo no navigation.launch.py (ex.: 1 ou 2).",
+    )
+
     args = parser.parse_args()
 
     if args.numero < 0:
@@ -473,15 +536,19 @@ def main():
             "O número do experimento deve ser não negativo."
         )
 
-    if args.duracao <= 0:
+    if not math.isfinite(args.duracao) or args.duracao <= 0:
         parser.error(
             "A duração deve ser positiva."
         )
+
+    if args.mapa < 1:
+        parser.error("O número do mapa deve ser positivo.")
 
     executar(
         args.numero,
         args.duracao,
         args.metodo,
+        args.mapa,
     )
 
 

@@ -1,57 +1,56 @@
 #!/usr/bin/env bash
-set -eo pipefail
+set -euo pipefail
 
 if [[ "$#" -ne 1 || ! "$1" =~ ^[0-9]+$ ]]; then
   echo "Uso: $0 NUMERO" >&2
   exit 2
 fi
-
 NUMERO="$1"
-ID=$(printf '%03d' "$((10#$NUMERO))")
 WORKSPACE="$HOME/tcc_slam_ws"
-DIR="$WORKSPACE/bags/experimento_${ID}"
+RESOLVIDO="$(python3 "$WORKSPACE/experimento_paths.py" "$NUMERO" --workspace "$WORKSPACE")" || exit 1
+mapfile -t PASTAS <<< "$RESOLVIDO"
+[[ "${#PASTAS[@]}" -eq 2 ]] || { echo "Falha ao localizar diretórios" >&2; exit 1; }
+DIR="${PASTAS[0]}"
+RESULTADOS="${PASTAS[1]}"
 MANIFEST="$DIR/manifest.json"
 BAG="$DIR/dados/ground_truth"
-RESULTADOS="$WORKSPACE/results/experimento_${ID}"
 
-if [[ ! -f "$MANIFEST" ]]; then
-  echo "ERRO: manifest.json ausente: $MANIFEST" >&2
-  echo "O arquivo registra a duracao e o metodo originais. Nao sera assumida uma duracao padrao." >&2
-  echo "Para uma gravacao antiga, crie manifest.json com slam_method e duracao_configurada_s corretos." >&2
+[[ -f "$MANIFEST" ]] || {
+  echo "Manifest ausente: $MANIFEST" >&2
+  echo "Não será inferida duração ou método; para dados antigos, preencha manifest.json." >&2
   exit 1
-fi
+}
 [[ -f "$BAG/metadata.yaml" ]] || { echo "Rosbag ausente: $BAG" >&2; exit 1; }
 
-# Lemos manifest com Python padrão, sem depender do ROS.
-readarray -t PARAMETROS < <(python3 - "$MANIFEST" <<'PYJSON'
-import json,sys,math
-with open(sys.argv[1],encoding="utf-8") as f:
-    m=json.load(f)
-metodo=m.get("slam_method")
-duracao=m.get("duracao_configurada_s")
-if metodo not in ("toolbox","graph","rbpf","ekf"):
-    sys.exit("Metodo ausente/invalido no manifest.json")
+# Confere os metadados do experimento original, sem valores inventados.
+METADADOS="$(python3 - "$MANIFEST" <<'PYJSON'
+import json, sys, math
+with open(sys.argv[1], encoding='utf-8') as f:
+    m = json.load(f)
+metodo = m.get('slam_method')
+if metodo not in ('toolbox','graph','rbpf','ekf'):
+    sys.exit('Método ausente/inválido no manifest.json')
 try:
-    duracao=float(duracao)
+    duracao = float(m.get('duracao_configurada_s'))
 except (TypeError, ValueError):
-    sys.exit("Duracao ausente/invalida no manifest.json")
-if not math.isfinite(duracao) or duracao<=0:
-    sys.exit("Duracao deve ser positiva e finita")
+    sys.exit('Duração ausente/inválida no manifest.json')
+if not math.isfinite(duracao) or duracao <= 0:
+    sys.exit('Duração inválida no manifest.json')
 print(metodo)
 print(duracao)
 PYJSON
-)
-if [[ "${#PARAMETROS[@]}" -ne 2 ]]; then
-  echo "ERRO: manifest.json sem metodo/duracao validos." >&2
-  exit 1
-fi
+)" || exit 1
+mapfile -t PARAMETROS <<< "$METADADOS"
 METODO="${PARAMETROS[0]}"
 DURACAO="${PARAMETROS[1]}"
 
+# setup.bash de ROS pode usar variáveis não inicializadas; evite 'nounset' nesta região.
+set +u
 source /opt/ros/lyrical/setup.bash
 source "$WORKSPACE/install/setup.bash"
+set -u
 mkdir -p "$RESULTADOS"
-printf '\nANALISE | experimento=%s | metodo=%s | duracao=%ss\n' "$ID" "$METODO" "$DURACAO"
+printf '\nANALISE | id=%s | pasta=%s | metodo=%s | duracao=%ss\n' "$NUMERO" "$(basename "$DIR")" "$METODO" "$DURACAO"
 
 ros2 run tcc_slam_analysis analisar_experimento \
     "$BAG" \

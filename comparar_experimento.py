@@ -22,6 +22,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
+from experimento_paths import localizar_experimento
+
 METODOS = {"ekf": "MRPT EKF-SLAM", "rbpf": "MRPT RBPF-SLAM",
            "graph": "MRPT GraphSLAM", "toolbox": "SLAM Toolbox"}
 METRICAS = [
@@ -75,7 +77,7 @@ def ler_csv(arquivo):
 
 def carregar(ws, numero_id):
     ident = f"{numero_id:03d}"
-    pasta = ws / "results" / f"experimento_{ident}"
+    pasta_bag, pasta = localizar_experimento(ws, numero_id)
     csv = pasta / "metricas.csv"
     if not csv.is_file():
         raise FileNotFoundError(f"Experimento {ident}: metricas.csv não encontrado: {csv}\n"
@@ -84,18 +86,23 @@ def carregar(ws, numero_id):
     if len(df) != 1:
         raise ValueError(f"{csv}: esperado exatamente 1 registro, encontrado {len(df)}")
     m = df.iloc[0].to_dict()
-    manifesto = ws / "bags" / f"experimento_{ident}" / "manifest.json"
+    manifesto = pasta_bag / "manifest.json"
+    mapa_id = None
+    modo = None
     if manifesto.is_file():
         try:
             dado = json.loads(manifesto.read_text(encoding="utf-8"))
             metodo_manifesto = dado.get("slam_method")
+            mapa_id = dado.get("map_id")
+            modo = dado.get("modo_experimento")
             if metodo_manifesto and m.get("experimento_metodo_slam") and str(metodo_manifesto) != str(m.get("experimento_metodo_slam")):
                 print(f"AVISO: método no manifest do experimento {ident} difere de metricas.csv", file=sys.stderr)
         except (ValueError, OSError) as e:
             print(f"AVISO: manifest.json do experimento {ident}: {e}", file=sys.stderr)
     metodo = str(m.get("experimento_metodo_slam", "não informado"))
-    label = f"{METODOS.get(metodo, metodo)} · {ident}"
+    label = f"{METODOS.get(metodo, metodo)} · {ident} · mapa {mapa_id if mapa_id is not None else chr(63)}"
     return {"id": ident, "num": numero_id, "pasta": pasta, "m": m,
+            "mapa_id": mapa_id, "modo": modo,
             "metodo": metodo, "label": label,
             "traj": ler_csv(pasta / "trajetoria_slam.csv"),
             "odom": ler_csv(pasta / "trajetoria_odom.csv"),
@@ -205,6 +212,15 @@ def comparar(ws, ids, saida=None):
     validos = [x for x in tempo if np.isfinite(x) and x > 0]
     limite = min(validos) if validos else 0
     avisos = []
+    mapas = [str(e["mapa_id"]) if e["mapa_id"] is not None else None for e in exp]
+    mapas_conhecidos = {m for m in mapas if m is not None}
+    mapas_incomparaveis = len(mapas_conhecidos) != 1 or any(x is None for x in mapas)
+    if mapas_incomparaveis:
+        avisos.append("MAPAS NÃO CONTROLADOS: experimentos usam mapas diferentes ou não possuem map_id no manifest. "
+                      "Não atribua diferenças de cobertura, deslocamento ou área exclusivamente ao SLAM.")
+    modos = {str(e["modo"]) if e["modo"] is not None else "não informado" for e in exp}
+    if len(modos) > 1:
+        avisos.append("MODOS DE EXPERIMENTO DIFERENTES: não comparar métricas de exploração como equivalentes.")
     if len(validos) != len(exp):
         avisos.append("Há experimentos sem duração analisada válida; algumas curvas podem estar ausentes.")
     if len(validos) > 1 and max(validos)-min(validos) > 1.0:
@@ -219,8 +235,8 @@ def comparar(ws, ids, saida=None):
         avisos.append("DIFERENTES MÉTODOS DE ALINHAMENTO DE TRAJETÓRIA: comparação de ATE requer cautela.")
     if len(set(e["metodo"] for e in exp)) != len(exp):
         avisos.append("Há mais de um experimento para o mesmo método: cada execução é mostrada separadamente, sem inferência estatística entre repetições.")
-    avisos.append("Comparação descritiva: resultados de execuções isoladas não demonstram superioridade estatística. Para comparar desempenho, utilize o mesmo ambiente, robô, duração e condições iniciais.")
-    avisos.append("Metas e área conhecida dependem do percurso explorado; diferença de cobertura não é sinônimo de precisão do mapa.")
+    avisos.append("Comparação descritiva: execuções isoladas não demonstram superioridade estatística. Exige-se mesmo mapa, mesma versão de código, trajetória/método de navegação controlados e sementes registradas.")
+    avisos.append("Metas e área conhecida dependem do percurso explorado e das características das grades; cobertura não mede automaticamente a acurácia geométrica do mapa.")
     if saida:
         if not re.fullmatch(r"[\w-]+", saida, re.UNICODE):
             raise ValueError("--saida aceita apenas letras, números, _ e -")
@@ -253,7 +269,7 @@ def comparar(ws, ids, saida=None):
         # Não classificar resultados quando duração varia, exceto erros de trajetória;
         # mesmo os erros exigem condições semelhantes.
         duracao_sensivel = chave.startswith("mapa_") or chave.startswith("exploracao_")
-        if objetivo != "informativo" and np.isfinite(valid).any() and not (duracao_sensivel and len(validos)>1 and max(validos)-min(validos)>1.0):
+        if objetivo != "informativo" and np.isfinite(valid).any() and not (duracao_sensivel and (mapas_incomparaveis or (len(validos)>1 and max(validos)-min(validos)>1.0))):
             best = int(np.nanargmin(valid) if objetivo=="menor" else np.nanargmax(valid))
         celulas = []
         for i, (e, v) in enumerate(zip(exp, valores)):

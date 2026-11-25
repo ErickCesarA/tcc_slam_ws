@@ -66,3 +66,12 @@ Thumbs.db
 
 *.pem
 *.key
+
+# Resultados e diagnósticos gerados automaticamente (dados científicos fora do Git)
+results/
+logs/
+backups/
+*.backup
+*.backup_*
+# Arquivos locais de depuração
+monitor_ekf_tf.log

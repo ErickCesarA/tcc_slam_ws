@@ -427,6 +427,47 @@ def ler_rosbag(caminho, storage_id):
     }
 
 
+def recuperar_mapa_final_no_intervalo(caminho, storage_id, inicio, fim):
+    """Seleciona a última grade com timestamp não posterior ao fim do teste.
+
+    Segunda passagem apenas se o último mapa geral foi publicado após
+    o intervalo: não precisa guardar dezenas de mapas grandes em RAM.
+    """
+    reader = rosbag2_py.SequentialReader()
+    reader.open(
+        rosbag2_py.StorageOptions(uri=str(caminho), storage_id=storage_id),
+        rosbag2_py.ConverterOptions(
+            input_serialization_format="cdr", output_serialization_format="cdr"),
+    )
+    tipos = {t.name: t.type for t in reader.get_all_topics_and_types()}
+    if "/map" not in tipos:
+        return None
+    tipo = get_message(tipos["/map"])
+    ultimo = None
+    ultimo_tempo = -float("inf")
+    while reader.has_next():
+        topico, payload, _ = reader.read_next()
+        if topico != "/map":
+            continue
+        msg = deserialize_message(payload, tipo)
+        t = timestamp_ros(msg.header.stamp)
+        if t <= 0 or t > fim or t < ultimo_tempo:
+            continue
+        # Guarda o último mapa até o fim experimental. Um mapa anterior
+        # ao início pode servir de condição inicial se não houve atualizações.
+        matriz = np.asarray(msg.data, dtype=np.int16)
+        ultimo = {
+            "tempo_s": t,
+            "data": matriz.copy().reshape((msg.info.height, msg.info.width)),
+            "resolucao": float(msg.info.resolution),
+            "origem_x": float(msg.info.origin.position.x),
+            "origem_y": float(msg.info.origin.position.y),
+            "frame_id": msg.header.frame_id,
+        }
+        ultimo_tempo = t
+    return ultimo
+
+
 # ============================================================
 # RECONSTRUÇÃO DA TRAJETÓRIA DO SLAM
 # ============================================================
@@ -1603,9 +1644,21 @@ def main():
     )
 
     print("\nGerando graficos e mapa final a partir da rosbag...")
+    imagem_mapa = dados["mapa_final"]
+    if imagem_mapa is not None and imagem_mapa["tempo_s"] > fim + 1e-6:
+        print("AVISO: última grade /map foi publicada depois do experimento; "
+              "buscando a última grade do intervalo válido...")
+        imagem_mapa = recuperar_mapa_final_no_intervalo(
+            bag, args.storage_id, inicio, fim)
+    if imagem_mapa is None:
+        print("AVISO: nenhuma grade /map disponível até o fim do experimento.")
+        # Não mantenha uma figura inválida gerada por análise anterior.
+        imagem_antiga = pasta_resultados / "mapa_final.png"
+        if imagem_antiga.exists():
+            imagem_antiga.unlink()
     relatorio = gerar_relatorio_visual(
         pasta_resultados, resultados, tabela_odom, tabela_slam,
-        evolucao, eventos_filtrados, dados["mapa_final"], inicio,
+        evolucao, eventos_filtrados, imagem_mapa, inicio,
     )
     print(f"Relatorio visual: {relatorio}")
     print(f"Mapa final: {pasta_resultados / 'mapa_final.png'}"
