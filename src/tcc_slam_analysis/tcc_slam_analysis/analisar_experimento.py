@@ -1661,6 +1661,21 @@ def main():
         evolucao, eventos_filtrados, imagem_mapa, inicio,
     )
     print(f"Relatorio visual: {relatorio}")
+    # TCC_PDF_AUTOMATICO_V1
+    try:
+        import subprocess
+        import sys
+        exportador_pdf = pasta_resultados.parents[1] / "exportar_pdf.py"
+        if exportador_pdf.is_file():
+            resultado_pdf = subprocess.run(
+                [sys.executable, str(exportador_pdf), str(relatorio)],
+                check=False,
+            )
+            if resultado_pdf.returncode != 0:
+                print("AVISO: PDF indisponivel; HTML e CSV preservados.")
+    except OSError as exc:
+        print(f"AVISO: nao foi possivel gerar PDF: {exc}")
+
     print(f"Mapa final: {pasta_resultados / 'mapa_final.png'}"
           if (pasta_resultados / 'mapa_final.png').exists()
           else "Mapa final indisponivel na gravacao.")

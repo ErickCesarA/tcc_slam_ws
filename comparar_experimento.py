@@ -325,6 +325,21 @@ def main():
     if len(set(args.experimentos))!=len(args.experimentos) or any(x<0 for x in args.experimentos):
         ap.error("Os números devem ser diferentes e não negativos")
     pasta, avisos = comparar(args.workspace.expanduser().resolve(),args.experimentos,args.saida)
+    # TCC_PDF_AUTOMATICO_V1
+    try:
+        import subprocess
+        import sys
+        exportador_pdf = args.workspace.expanduser().resolve() / "exportar_pdf.py"
+        if exportador_pdf.is_file():
+            resultado_pdf = subprocess.run(
+                [sys.executable, str(exportador_pdf), str(pasta / "relatorio_comparativo.html")],
+                check=False,
+            )
+            if resultado_pdf.returncode != 0:
+                print("AVISO: PDF indisponivel; HTML e CSV preservados.")
+    except OSError as exc:
+        print(f"AVISO: nao foi possivel gerar PDF: {exc}")
+
     print("\nCOMPARAÇÃO CONCLUÍDA")
     print(f"Relatório HTML: {pasta/'relatorio_comparativo.html'}")
     print(f"Métricas: {pasta/'metricas_comparadas.csv'}")
