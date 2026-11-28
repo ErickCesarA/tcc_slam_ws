@@ -15,6 +15,10 @@ setup(
             'share/' + package_name,
             ['package.xml']
         ),
+        ('share/' + package_name + '/routes', [
+            'routes/mapa_1.json', 'routes/mapa_2.json',
+            'routes/mapa_3.json', 'routes/mapa_4.json',
+        ]),
     ],
     install_requires=['setuptools'],
     zip_safe=True,
@@ -25,6 +29,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
+            'fixed_route = tcc_slam_exploration.fixed_route:main',
             'frontier_explorer = '
             'tcc_slam_exploration.frontier_explorer:main',
         ],

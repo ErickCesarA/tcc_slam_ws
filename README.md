@@ -1,245 +1,103 @@
-# Comparação de Métodos SLAM em Robô Móvel Autônomo
+# TCC — Comparação de SLAM com ROS 2 Lyrical, MRPT e Nav2
 
-**ROS 2 Lyrical · Gazebo Sim · Nav2 · MRPT · SLAM Toolbox**
+Workspace de pesquisa: robô diferencial simulado no Gazebo, visualização RViz2, três implementações MRPT (GraphSLAM, RBPF-SLAM e EKF-SLAM), exploração por fronteiras e rotas fixas. Aquisição em rosbag2 e análise de métricas e mapas.
 
-Projeto de Trabalho de Conclusão de Curso (TCC) em **Engenharia Mecânica — Instituto Federal da Paraíba (IFPB)**. O sistema simula um robô móvel de tração diferencial e permite estudar diferentes métodos de **Localização e Mapeamento Simultâneos (SLAM)** em ambientes virtuais, com navegação autônoma, aquisição de dados e avaliação quantitativa.
+## Organização
 
-> **Escopo científico:** a exploração autônoma avalia o desempenho do **sistema integrado SLAM + navegação + exploração**. Os experimentos com trajetória fixa e degradação de sensores estão previstos como extensões e ainda não fazem parte do fluxo principal documentado aqui.
+- `src/tcc_slam_description/`: robô Xacro/URDF e mundos SDF (mapas 1–4).
+- `src/tcc_slam_bringup/`: lançamento, bridges, Nav2, arquivos MRPT, prontidão e bootstrap.
+- `src/tcc_slam_exploration/`: explorador de fronteiras e rota fixa; `routes/mapa_1.json` até `mapa_4.json`.
+- `src/tcc_slam_ground_truth/`: posição de referência no simulador.
+- `src/tcc_slam_analysis/`: processamento da rosbag e gráficos/relatórios.
+- `src/mrpt_{graphslam_2d,rbpf_slam,ekf_slam_2d}/`: adaptações dos pacotes de terceiros.
+- `executar_experimento.py`, `executar_bateria_tcc.py`, `worker_experimento_terminal.py`: experimento individual e bateria (uma janela de terminal por teste).
+- `analisar_experimento.sh`, `comparar_experimento.py`, `consistencia_repeticoes.py`, `exportar_pdf.py`, `experimento_paths.py`: análise, comparações e relatórios.
 
-## Funcionalidades
+**Preserve `bags/` e `results/`: são dados científicos, não arquivos descartáveis.** `logs/`, `backups/`, `build/`, `install/`, `log/` e `__pycache__/` são artefatos operacionais. Não remova `.git/`: contém histórico e alterações versionadas.
 
-- Simulação de um **robô diferencial**, com LiDAR 2D, IMU, odometria e descrição em Xacro/URDF.
-- Dois cenários SDF selecionáveis pelo parâmetro `map`.
-- Escolha de **quatro métodos de SLAM** pelo parâmetro `slam_method`.
-- Navegação com **Nav2** e exploração autônoma por fronteiras (*Frontier Explorer V5*).
-- Registro de posições de referência (*ground truth*) fornecidas pelo Gazebo.
-- Gravação experimental com **rosbag2**, controle por tempo simulado e eventos de exploração.
-- Cálculo de métricas de trajetória, mapeamento e navegação.
-- Relatórios individuais e comparativos em **HTML**, com gráficos, CSVs e imagem do mapa final.
+## Instalação e compilação
 
-## Métodos implementados
-
-| Identificador | Implementação | Abordagem |
-| --- | --- | --- |
-| `toolbox` | SLAM Toolbox | SLAM 2D baseado em grafos |
-| `graph` | MRPT GraphSLAM | SLAM baseado em grafos |
-| `rbpf` | MRPT RBPF-SLAM | Filtro de partículas Rao-Blackwellizado |
-| `ekf` | MRPT EKF-SLAM 2D | Filtro de Kalman Estendido e landmarks |
-
-Os pacotes MRPT foram adaptados para a pilha ROS 2 do projeto, incluindo interfaces de mensagens, sincronização temporal e transformações TF. A implementação EKF utiliza dois componentes auxiliares: um detector de *landmarks* a partir do LiDAR e um construtor de grade de ocupação para disponibilizar `/map` ao Nav2.
-
-> As adaptações de integração não devem ser confundidas com uma implementação própria das formulações matemáticas fundamentais dos algoritmos MRPT.
-
-## Arquitetura
-
-```text
-                  Gazebo Sim
-            mundo + robô + sensores
-                       │
-                 ros_gz_bridge
-                       │
-          /scan  /odom  /imu/data  /clock
-                       │
-                       ▼
-   ┌──────────────────────────────────────┐
-   │ Método selecionado:                 │
-   │ Toolbox · MRPT Graph · RBPF · EKF   │
-   └──────────────────────────────────────┘
-                │               │
-              /map          map → odom
-                └──────┬────────┘
-                       ▼
-              Frontier Explorer V5
-                       │
-                       ▼
-               Nav2 /navigate_to_pose
-                       │
-                     /cmd_vel
-                       │
-                       ▼
-                   Gazebo Sim
-
-    /ground_truth/odom + /tf + /map + eventos
-                       │
-                       ▼
-                rosbag2 → análise
-                       │
-                 CSV + PNG + HTML
-```
-
-A árvore de referenciais utilizada na navegação segue a composição `map → odom → base_link → lidar_link` (com `imu_link` vinculado ao robô). Somente o método SLAM selecionado deve publicar a correção global `map → odom`.
-
-## Organização do repositório
-
-```text
-tcc_slam_ws/
-├── src/
-│   ├── tcc_slam_description/     # URDF/Xacro e mundos SDF
-│   ├── tcc_slam_bringup/         # launchers, configuração Nav2 e MRPT
-│   ├── tcc_slam_ground_truth/    # referência de pose da simulação
-│   ├── tcc_slam_exploration/     # Frontier Explorer V5
-│   ├── tcc_slam_analysis/        # processamento e relatórios
-│   ├── mrpt_ekf_slam_2d/        # integração MRPT EKF
-│   ├── mrpt_rbpf_slam/          # integração MRPT RBPF
-│   └── mrpt_graphslam_2d/       # integração MRPT GraphSLAM
-├── executar_experimento.py      # aquisição e controle de experimentos
-├── analisar_experimento.sh      # reanálise por número
-├── comparar_experimento.py      # comparação entre experimentos
-├── bags/                        # gravações rosbag2 (normalmente locais)
-├── results/                     # relatórios e métricas produzidos
-├── third_party/                 # atribuições/licenças de terceiros
-└── README.md
-```
-
-`build/`, `install/` e `log/` são gerados pelo `colcon` e não devem ser versionados. As gravações em `bags/` podem ser grandes; mantenha-as fora do Git e disponibilize conjuntos de dados separadamente, quando necessário.
-
-## Ambiente de desenvolvimento
-
-Configuração utilizada no desenvolvimento:
-
-- **Ubuntu 26.04** e **ROS 2 Lyrical**;
-- **Gazebo Sim** e `ros_gz_bridge`;
-- **Nav2**, **RViz2** e **SLAM Toolbox**;
-- **MRPT 3.3.1** e pacotes ROS de integração MRPT;
-- **Python 3**, NumPy, Pandas e Matplotlib;
-- **C++**, `colcon`, `ament`, `rosbag2` e `tf2`.
-
-O projeto possui adaptações específicas para essa combinação. Não se deve presumir compatibilidade imediata com outras distribuições do ROS 2 ou versões do MRPT sem recompilar e validar os pacotes.
-
-### Preparar o workspace
-
-Com ROS 2 Lyrical e as dependências acima instaladas:
+Requer Ubuntu 26.04, ROS 2 Lyrical, Gazebo Sim, ROS-Gazebo Bridge, Nav2, MRPT, Python com Pandas/NumPy/Matplotlib e dependências declaradas nos `package.xml`. As adaptações C++ requerem recompilação; **não basta copiar o código atualizado para `src/`**.
 
 ```bash
 source /opt/ros/lyrical/setup.bash
 cd ~/tcc_slam_ws
-
-# Opcional, quando rosdep estiver configurado e as dependências
-# estiverem disponíveis nos repositórios da distribuição:
-rosdep install --from-paths src --ignore-src -r -y
-
-colcon build --symlink-install --parallel-workers 1 \
-  --cmake-args -DBUILD_TESTING=OFF
-
+colcon build --symlink-install --parallel-workers 1 --cmake-args -DBUILD_TESTING=OFF
 source install/setup.bash
 ```
 
-> Alguns componentes MRPT exigiram adaptações de compatibilidade, presentes neste repositório. Se houver erro de dependências, consulte os `package.xml` e os arquivos de configuração de cada pacote; `rosdep` pode não resolver todas as dependências específicas automaticamente.
+Para verificar arquivos Python após atualizações:
 
-## Executar simulação, SLAM e Nav2
+```bash
+python3 -m py_compile executar_bateria_tcc.py worker_experimento_terminal.py executar_experimento.py
+```
 
-O arquivo `navigation.launch.py` inicializa a simulação compartilhada, o método SLAM escolhido, os componentes auxiliares e a infraestrutura Nav2. **Não abra outra instância do `simulation.launch.py` em paralelo.**
+## Experimento individual
+
+Terminal 1:
 
 ```bash
 source /opt/ros/lyrical/setup.bash
 source ~/tcc_slam_ws/install/setup.bash
-
-# Exemplo: mundo 1 com SLAM Toolbox
-ros2 launch tcc_slam_bringup navigation.launch.py \
-  map:=1 slam_method:=toolbox
+ros2 launch tcc_slam_bringup navigation.launch.py map:=2 slam_method:=graph
 ```
 
-Outras combinações:
-
-```bash
-# Mundo 2 com MRPT GraphSLAM
-ros2 launch tcc_slam_bringup navigation.launch.py \
-  map:=2 slam_method:=graph
-
-# Mundo 1 com MRPT RBPF-SLAM
-ros2 launch tcc_slam_bringup navigation.launch.py \
-  map:=1 slam_method:=rbpf
-
-# Mundo 2 com MRPT EKF-SLAM
-ros2 launch tcc_slam_bringup navigation.launch.py \
-  map:=2 slam_method:=ekf
-```
-
-### Mundos disponíveis
-
-| `map` | Arquivo | Nome interno Gazebo |
-| --- | --- | --- |
-| `1` | `tcc_world.sdf` | `tcc_world` |
-| `2` | `tcc_world_2.sdf` | `tcc_world_2` |
-
-Os arquivos ficam em `src/tcc_slam_description/worlds/`. Para incluir outro ambiente, adicione o SDF e registre seu identificador, nome de arquivo e nome interno em `MAPAS`, no `simulation.launch.py`. Recompile ao modificar arquivos instalados pelos pacotes.
-
-## Executar um experimento autônomo
-
-Com o sistema de navegação inicializado, abra outro terminal:
+Terminal 2 (depois de Nav2 ficar ativo):
 
 ```bash
 source /opt/ros/lyrical/setup.bash
 source ~/tcc_slam_ws/install/setup.bash
-
-python3 ~/tcc_slam_ws/executar_experimento.py 17 \
-  --duracao 180 \
-  --metodo graph
+python3 ~/tcc_slam_ws/executar_experimento.py 300 --metodo graph --mapa 2 --duracao 180 --movimentacao fronteiras
 ```
 
-- `17`: identificador numérico do experimento (deve estar disponível);
-- `--duracao 180`: duração em **segundos simulados**;
-- `--metodo graph`: algoritmo que já deve estar em execução no launcher.
+Para rota fixa, utilize `--movimentacao rota_fixa`. Nesse modo, `--duracao` não determina o encerramento: a execução termina quando a rota é concluída ou quando há falha.
 
-O executor aguarda o Nav2, aciona a exploração, grava os tópicos de interesse e solicita a análise ao término. Ele **não inicia nem seleciona** o método SLAM: `--metodo` identifica o algoritmo empregado.
+## Bateria em terminais separados
 
-> **Estado do código contido no snapshot do repositório analisado:** o executor grava em `bags/experimento_017/` e os resultados em `results/experimento_017/`. A atualização posterior de organização introduz pastas como `exp_17_mtd_graph_time_180_map_2` e a opção `--mapa`, mas esse formato só deve ser documentado como ativo **depois que a atualização for aplicada ao repositório**. Até lá, o mundo selecionado no launcher deve ser registrado manualmente no protocolo experimental.
-
-## Analisar e comparar experimentos
-
-Reanalisar uma execução já gravada:
+Terminal principal:
 
 ```bash
-~/tcc_slam_ws/analisar_experimento.sh 17
+python3 ~/tcc_slam_ws/executar_bateria_tcc.py \
+  --inicio 400 --metodos graph rbpf ekf --mapas 1 2 3 4 \
+  --movimentacao ambas --repeticoes 3 --duracao 180 --simular
 ```
 
-O script recupera o método e a duração do `manifest.json` correspondente. Os experimentos precisam conter os metadados e a rosbag necessários à análise.
+Remova `--simular` para executar de verdade. O terminal principal abre um terminal gráfico por experimento, inicializa `navigation.launch.py`, espera Nav2 ativo, executa `executar_experimento.py`, encerra os subprocessos e abre o próximo terminal.
 
-Comparar pelo menos duas execuções:
+- `--retomar`: ignora **somente** IDs com bag, manifest e resultados válidos. Resultados incompletos não são sobrescritos.
+- `--tentativas-inicializacao 2`: reinicia um teste em outro terminal **somente** quando falhou antes da primeira meta; pastas parciais de tentativas são preservadas sob logs/dados_parciais/; uma falha durante a navegação não é repetida automaticamente.
+- `--pausa 12`: segundos reais de intervalo entre terminais.
+- `--timeout-prontidao 240`, `--timeout-fronteiras 3600`, `--timeout-rota 7200`: limites em segundos reais para detectar travamentos.
+- `--sem-comparacoes`, `--comparar-metodos`: opções de avaliação; `--somente-comparar` não executa simulações.
+
+A bateria para na primeira falha real de navegação para **não adulterar a amostra**. Logs de cada tentativa ficam em `logs/baterias_terminais/`.
+
+## Análise e integridade
 
 ```bash
-python3 ~/tcc_slam_ws/comparar_experimento.py 17 18 19 20 \
-  --saida comparacao_200s
+~/tcc_slam_ws/analisar_experimento.sh 300
+python3 ~/tcc_slam_ws/comparar_experimento.py 300 301 302
 ```
 
-Os resultados comparativos são exportados para `results/comparacoes/`. Abra o arquivo `relatorio_comparativo.html` no navegador para consultar tabelas, gráficos e mapas finais.
+Para cada combinação, compare apenas resultados com mesmo mapa, modo de movimentação e (para fronteiras) tempo simulado configurado; para rotas fixas, preserve o hash SHA-256 do JSON. A bateria não altera pontos de rota. A configuração do Nav2 é compartilhada pelos três métodos para garantir condições equivalentes.
 
-### Métricas produzidas
+**Mudanças desta revisão:**
+- `controller_frequency`: 20 → 10 Hz, mantendo `FollowPath.model_dt=0.05` s (dentro da regra do MPPI de não usar `model_dt` maior que o período de controle).
+- `transform_tolerance`: 0,3 s nos costmaps local e global; a tolerância do `controller_server` é herdada do costmap local, não um parâmetro próprio declarado no nó.
+- O GraphSLAM data a transformação `map → odom` 100 ms à frente do relógio simulado para evitar pequenas extrapolações futuras; valores de pose e timestamps das observações não mudam.
+- Removida a serialização repetida do histórico inteiro de odometria 20 vezes/s; publicações de diagnóstico do GraphSLAM reduzidas, sem modificar o grafo nem as métricas do rosbag.
+- Removido o caminho ativo obsoleto do SLAM Toolbox. O código de análise ainda reconhece o identificador `toolbox` em resultados legados.
 
-| Dimensão | Indicadores |
-| --- | --- |
-| Localização | ATE translacional e angular, RMSE, estatísticas descritivas |
-| Consistência de movimento | RPE em janelas de 1, 5 e 10 segundos |
-| Mapeamento | Área conhecida, área livre/ocupada, expansão temporal e taxa média |
-| Navegação | Metas enviadas, alcançadas, falhas e sem resultado |
-| Eficiência | Área conhecida acrescentada por tempo e por distância |
-| Apresentação | Trajetórias, gráficos de erro, mapa final e relatórios HTML |
+Esses ajustes podem alterar resultados; portanto, **não misture repetições feitas antes e depois da revisão sem identificar a versão da configuração**.
 
-O mapeamento é acompanhado pela grade de ocupação publicada em `/map`, e as trajetórias estimadas são comparadas à referência `/ground_truth/odom` após a sincronização e o alinhamento definidos pelo analisador.
+## Limpeza segura
 
-## Cuidados para uma comparação científica válida
+A ferramenta `limpar_workspace.sh` (fornecida no pacote de patch) mostra o que seria removido; só apaga arquivos com `--aplicar`. Preserva sempre `.git/`, `bags/` e `results/`. `build/` e `install/` só são removidos caso você peça `--limpar-build` e será necessário recompilar.
 
-1. **Manter condições controladas:** mesmo robô, sensores, ambiente, duração configurada, versão do Frontier Explorer e parâmetros do Nav2 ao comparar métodos.
-2. **Distinguir as avaliações:** na exploração autônoma, cada SLAM pode levar o robô por uma trajetória diferente. Os resultados medem o sistema integrado, não apenas o algoritmo de localização isoladamente.
-3. **Registrar configurações:** identificar método, mapa, parâmetros, versão do código e duração efetivamente analisada.
-4. **Repetir as execuções:** uma execução por método permite comparação descritiva, mas não sustenta inferências estatísticas robustas.
-5. **Não confundir cobertura e qualidade geométrica:** uma maior área conhecida não garante paredes mais precisas; a avaliação quantitativa da geometria do mapa requer referência e métrica próprias.
-6. **Controlar o tempo de preparação:** o GraphSLAM utiliza um procedimento de *bootstrap* anterior ao início da navegação; o protocolo deve considerar esse efeito na interpretação da cobertura inicial.
+## Limites de validação
 
-## Próximas etapas planejadas
+Este pacote passou por validação sintática e testes automatizados offline. **Ele não foi executado no Ubuntu do usuário com ROS 2/Gazebo/Nav2 reais**, portanto a estabilidade de dezenas de simulações consecutivas exige um teste local. Não é possível garantir ausência de falhas de ambiente ou de planejamento.
 
-- **Trajetória fixa por mundo:** executar rotas equivalentes com os quatro métodos para reduzir a influência da estratégia de exploração na avaliação de SLAM.
-- **Incerteza controlada dos sensores:** introduzir perturbações no LiDAR, IMU e odometria para estudar robustez, preservando a rastreabilidade dos dados e dos referenciais TF.
+## Licenças
 
-Essas funcionalidades **ainda não estão apresentadas como implementadas** neste README.
-
-## Código de terceiros e licenças
-
-Este repositório contém pacotes MRPT e adaptações de integração. Consulte `third_party/MRPT_ROS_LICENSE.txt` e os arquivos de licença dos pacotes de origem. As licenças e declarações em `package.xml` devem ser revisadas e uniformizadas antes de publicar uma licença geral para todo o código próprio; alguns pacotes locais ainda apresentam campos de licença provisórios.
-
-## Autor
-
-**Erick Cesar**  
-Engenharia Mecânica — Instituto Federal da Paraíba (IFPB)
-
-Projeto acadêmico para estudo e comparação de métodos de SLAM em robôs móveis autônomos.
+Os pacotes MRPT derivam de terceiros. Consulte `third_party/` e as licenças específicas nos pacotes antes de republicar o código.

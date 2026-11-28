@@ -82,16 +82,6 @@ def generate_launch_description():
         }.items(),
     )
 
-    toolbox_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            os.path.join(get_package_share_directory("slam_toolbox"), "launch", "online_sync_launch.py")
-        ),
-        launch_arguments={
-            "use_sim_time": use_sim_time,
-            "slam_params_file": os.path.join(bringup_share, "config", "slam_toolbox.yaml"),
-        }.items(),
-    )
-
     graph_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             os.path.join(get_package_share_directory("mrpt_graphslam_2d"), "launch", "graphslam.launch.py")
@@ -172,6 +162,26 @@ def generate_launch_description():
     )
 
     # ============================================================
+    # 4B. BLOQUEAR SLAM ATE A SIMULACAO ESTAR PRONTA
+    # ============================================================
+
+    # IMPORTANTISSIMO: o bootstrap GraphSLAM possui um timeout curto para /scan.
+    # Executa-lo ao mesmo tempo que o Gazebo carrega outro mundo pode encerrar
+    # prematuramente o launch e interromper a insercao do robo.
+    # Este monitor espera clock, LiDAR, odometria e TF antes de iniciar qualquer SLAM.
+    pre_slam_gate = ExecuteProcess(
+        cmd=[
+            sys.executable,
+            monitor_file,
+            "--mode", "pre_slam",
+            "--node-name", "navigation_gate_pre_slam",
+            "--timeout", "150",
+        ],
+        output="screen",
+        name="navigation_gate_pre_slam",
+    )
+
+    # ============================================================
     # 5. SERVIDORES NAV2
     # ============================================================
 
@@ -202,6 +212,7 @@ def generate_launch_description():
         parameters=[{
             "use_sim_time": use_sim_time,
             "autostart": True,
+            "bond_timeout": 15.0,
             "node_names": [
                 "controller_server",
                 "smoother_server",
@@ -314,7 +325,6 @@ def generate_launch_description():
     def selecionar_inicializacao(context):
         metodo = slam_method.perform(context).strip().lower()
         arquivos = {
-            "toolbox": [],
             "graph": [],
             "rbpf": [os.path.join(mrpt_config, "rbpf_slam.ini"),
                      os.path.join(mrpt_config, "rbpf_params.yaml")],
@@ -322,7 +332,7 @@ def generate_launch_description():
         }
         if metodo not in arquivos:
             return [
-                LogInfo(msg=f"ERRO: slam_method={metodo!r} invalido. Use toolbox, graph, rbpf ou ekf."),
+                LogInfo(msg=f"ERRO: slam_method={metodo!r} invalido. Use graph, rbpf ou ekf."),
                 EmitEvent(event=Shutdown(reason="Metodo SLAM desconhecido.")),
             ]
         ausentes = [arquivo for arquivo in arquivos[metodo] if not os.path.isfile(arquivo)]
@@ -333,8 +343,6 @@ def generate_launch_description():
             ]
 
         # Importante: apenas o metodo selecionado deve publicar /map e map->odom.
-        if metodo == "toolbox":
-            return [LogInfo(msg="SLAM Toolbox selecionado"), toolbox_launch, pre_nav_monitor]
         if metodo == "rbpf":
             return [LogInfo(msg="MRPT RBPF-SLAM selecionado"), rbpf_launch, pre_nav_monitor]
         if metodo == "ekf":
@@ -345,7 +353,24 @@ def generate_launch_description():
         return [LogInfo(msg="MRPT GraphSLAM selecionado"),
                 graph_launch, bootstrap_process]
 
-    iniciar_fluxo = OpaqueFunction(function=selecionar_inicializacao)
+    def apos_gate_pre_slam(event, context):
+        if event.returncode != 0:
+            return [
+                LogInfo(msg="ERRO: simulacao nao ficou pronta; SLAM nao sera iniciado."),
+                EmitEvent(event=Shutdown(reason="Falha no gate pre-SLAM da navegacao.")),
+            ]
+
+        return [
+            LogInfo(msg="Gazebo, sensores e TF prontos. Iniciando o SLAM selecionado..."),
+            *selecionar_inicializacao(context),
+        ]
+
+    gate_handler = RegisterEventHandler(
+        OnProcessExit(
+            target_action=pre_slam_gate,
+            on_exit=apos_gate_pre_slam,
+        )
+    )
 
     # ============================================================
     # 10. LAUNCH DESCRIPTION
@@ -365,8 +390,8 @@ def generate_launch_description():
 
         DeclareLaunchArgument(
             "slam_method",
-            default_value="toolbox",
-            description="Metodo de SLAM: toolbox, graph, rbpf ou ekf",
+            default_value="graph",
+            description="Metodo de SLAM: graph, rbpf ou ekf",
         ),
 
         DeclareLaunchArgument(
@@ -387,8 +412,10 @@ def generate_launch_description():
         # Selecionar metodo e fluxo de inicializacao
         # --------------------------------------------------------
 
+        gate_handler,
+
         simulation_launch,
 
-        iniciar_fluxo,
+        pre_slam_gate,
 
     ])

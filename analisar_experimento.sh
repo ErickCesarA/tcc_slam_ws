@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# TCC_ROUTE_END_V1
 set -euo pipefail
 
 if [[ "$#" -ne 1 || ! "$1" =~ ^[0-9]+$ ]]; then
@@ -23,26 +24,34 @@ BAG="$DIR/dados/ground_truth"
 [[ -f "$BAG/metadata.yaml" ]] || { echo "Rosbag ausente: $BAG" >&2; exit 1; }
 
 # Confere os metadados do experimento original, sem valores inventados.
+# Lemos metodo, duracao (quando aplicavel) e modo registrados no manifest.
 METADADOS="$(python3 - "$MANIFEST" <<'PYJSON'
 import json, sys, math
-with open(sys.argv[1], encoding='utf-8') as f:
-    m = json.load(f)
+with open(sys.argv[1],encoding='utf-8') as f:
+    m=json.load(f)
 metodo = m.get('slam_method')
+modo = m.get('modo_experimento') or 'fronteiras'
 if metodo not in ('toolbox','graph','rbpf','ekf'):
-    sys.exit('Método ausente/inválido no manifest.json')
-try:
-    duracao = float(m.get('duracao_configurada_s'))
-except (TypeError, ValueError):
-    sys.exit('Duração ausente/inválida no manifest.json')
-if not math.isfinite(duracao) or duracao <= 0:
-    sys.exit('Duração inválida no manifest.json')
+    sys.exit('Metodo ausente/invalido no manifest.json')
+if modo not in ('fronteiras', 'rota_fixa'):
+    sys.exit('Modo de movimentacao invalido no manifest.json')
+if modo == 'fronteiras':
+    try: duracao = float(m.get('duracao_configurada_s'))
+    except (TypeError, ValueError): sys.exit('Duracao invalida no manifest')
+    if not math.isfinite(duracao) or duracao <= 0:
+        sys.exit('Duracao deve ser positiva no modo fronteiras')
+else:
+    duracao = 'auto'
 print(metodo)
 print(duracao)
+print(modo)
 PYJSON
 )" || exit 1
 mapfile -t PARAMETROS <<< "$METADADOS"
+[[ "${#PARAMETROS[@]}" -eq 3 ]] || { echo "Manifest invalido" >&2; exit 1; }
 METODO="${PARAMETROS[0]}"
 DURACAO="${PARAMETROS[1]}"
+MODO="${PARAMETROS[2]}"
 
 # setup.bash de ROS pode usar variáveis não inicializadas; evite 'nounset' nesta região.
 set +u
@@ -50,15 +59,14 @@ source /opt/ros/lyrical/setup.bash
 source "$WORKSPACE/install/setup.bash"
 set -u
 mkdir -p "$RESULTADOS"
-printf '\nANALISE | id=%s | pasta=%s | metodo=%s | duracao=%ss\n' "$NUMERO" "$(basename "$DIR")" "$METODO" "$DURACAO"
+printf '\nANALISE | id=%s | pasta=%s | metodo=%s | modo=%s | duracao=%s\n' "$NUMERO" "$(basename "$DIR")" "$METODO" "$MODO" "$DURACAO"
 
-ros2 run tcc_slam_analysis analisar_experimento \
-    "$BAG" \
-    --storage-id mcap \
-    --duracao "$DURACAO" \
-    --metodo "$METODO" \
-    --alinhamento inicial \
-    --saida-trajetoria "$RESULTADOS/trajetoria.csv" \
-    --saida-metricas "$RESULTADOS/metricas.csv"
+ARGUMENTOS=("$BAG" --storage-id mcap --metodo "$METODO" --movimentacao "$MODO" --alinhamento inicial
+    --saida-trajetoria "$RESULTADOS/trajetoria.csv"
+    --saida-metricas "$RESULTADOS/metricas.csv")
+if [[ "$MODO" == "fronteiras" ]]; then
+    ARGUMENTOS+=(--duracao "$DURACAO")
+fi
+ros2 run tcc_slam_analysis analisar_experimento "${ARGUMENTOS[@]}"
 
 printf '\nRelatorio: %s/relatorio.html\nMapa: %s/mapa_final.png\n' "$RESULTADOS" "$RESULTADOS"

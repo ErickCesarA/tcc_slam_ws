@@ -116,7 +116,7 @@ def generate_launch_description():
             'disable_MRPT_visuals': LaunchConfiguration('disable_MRPT_visuals'),
             'verbosity': LaunchConfiguration('verbosity'),
             'output_directory': LaunchConfiguration('output_directory'),
-            'user_sim_true':True,
+            'use_sim_time': True,
         }],
         remappings=[
             ("/input/laser_scan", "/scan"),

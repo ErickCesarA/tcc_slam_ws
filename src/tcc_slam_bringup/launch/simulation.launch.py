@@ -46,10 +46,6 @@ MAPAS = {
         'arquivo': 'tcc_world_4.sdf',
         'world_name': 'tcc_world_4',
     },
-    '5': {
-        'arquivo': 'tcc_world_5.sdf',
-        'world_name': 'tcc_world_5',
-    },
 }
 
 
@@ -93,10 +89,6 @@ def iniciar_simulacao(context):
         "tcc_slam_bringup"
     )
 
-    slam_share = get_package_share_directory(
-        "slam_toolbox"
-    )
-
     xacro_file = os.path.join(
         description_share,
         "urdf",
@@ -110,12 +102,6 @@ def iniciar_simulacao(context):
     )
 
     world_name = mapa_config["world_name"]
-
-    slam_config = os.path.join(
-        bringup_share,
-        "config",
-        "slam_toolbox.yaml",
-    )
 
     monitor_file = os.path.join(
         bringup_share,
@@ -304,24 +290,6 @@ def iniciar_simulacao(context):
     )
 
     # ========================================================
-    # 14. SLAM TOOLBOX
-    # ========================================================
-
-    slam_launch = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            os.path.join(
-                slam_share,
-                "launch",
-                "online_sync_launch.py",
-            )
-        ),
-        launch_arguments={
-            "slam_params_file": slam_config,
-            "use_sim_time": "true",
-        }.items(),
-    )
-
-    # ========================================================
     # 15. RVIZ2
     # ========================================================
 
@@ -393,7 +361,6 @@ def iniciar_simulacao(context):
             LogInfo(
                 msg="Sensores e TF disponiveis. Inicializacao concluida."
             ),
-            # slam_launch e iniciado pelo navigation.launch.py
             rviz,
         ]
 

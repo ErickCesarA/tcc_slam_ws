@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# TCC_ROUTE_END_V1
 """Convenções de diretórios de experimentos; suporta formato legado.
 
 Formato novo: exp_17_mtd_graph_time_180_map_2
@@ -11,19 +12,23 @@ from pathlib import Path
 import re
 
 METODOS = {"toolbox", "graph", "rbpf", "ekf"}
-NOVO = re.compile(r"^exp_(\d+)_mtd_(toolbox|graph|rbpf|ekf)_time_([0-9]+(?:p[0-9]+)?)_map_(\d+)$")
+NOVO = re.compile(r"^exp_(\d+)_mtd_(toolbox|graph|rbpf|ekf)_time_(auto|[0-9]+(?:p[0-9]+)?)_map_(\d+)$")
 ANTIGO = re.compile(r"^experimento_(\d+)$")
 
 
 def nome_experimento(numero: int, metodo: str, duracao: float, mapa: int) -> str:
     if numero < 0 or metodo not in METODOS or mapa < 1:
         raise ValueError('Número >= 0, mapa >= 1 e método válido são obrigatórios.')
-    if not math.isfinite(duracao) or duracao <= 0:
-        raise ValueError('Duração deve ser positiva e finita.')
-    if float(duracao).is_integer():
-        tempo = str(int(duracao))
+    # Rota fixa: tempo real e conhecido apenas ao completar todos os pontos.
+    if duracao is None:
+        tempo = 'auto'
     else:
-        tempo = f'{duracao:.6f}'.rstrip('0').rstrip('.').replace('.', 'p')
+        if not math.isfinite(duracao) or duracao <= 0:
+            raise ValueError('Duração deve ser positiva e finita.')
+        if float(duracao).is_integer():
+            tempo = str(int(duracao))
+        else:
+            tempo = f'{duracao:.6f}'.rstrip('0').rstrip('.').replace('.', 'p')
     return f'exp_{numero}_mtd_{metodo}_time_{tempo}_map_{mapa}'
 
 

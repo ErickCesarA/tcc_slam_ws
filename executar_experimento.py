@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# TCC_ROUTE_END_V1
 
 import argparse
 import json
@@ -52,6 +53,10 @@ class MonitorExperimento(Node):
         self.tempo_inicial = None
         self.ultimo_clock = None
         self.erro_clock = False
+        self.rota_concluida = False
+        self.rota_falhou = False
+        self.rota_erro = None
+        self.tempo_fim_rota = None
 
         self.nav_client = ActionClient(
             self,
@@ -111,6 +116,14 @@ class MonitorExperimento(Node):
             return
 
         nome = evento.get("event")
+
+        if nome == "ROUTE_COMPLETED":
+            self.rota_concluida = True
+            self.tempo_fim_rota = float(evento.get("timestamp", self.tempo_simulado))
+            self.get_logger().info("ROTA COMPLETA: todos os waypoints atingidos.")
+        elif nome in ("ROUTE_FAILED", "ROUTE_START_TIMEOUT"):
+            self.rota_falhou = True
+            self.rota_erro = evento.get("reason", nome)
 
         self.get_logger().info(
             f"Evento recebido: {nome}"
@@ -233,18 +246,23 @@ def registrar_proveniencia(workspace, sdf):
             'hashes_configuracao_sha256': hashes}
 
 
-def executar(numero, duracao, metodo, mapa):
+def executar(numero, duracao, metodo, mapa, movimentacao):
 
     workspace = Path.home() / "tcc_slam_ws"
 
     identificador = f"{numero:03d}"
     checar_id_disponivel(workspace, numero)
-    pasta_nome = nome_experimento(numero, metodo, duracao, mapa)
+    pasta_nome = nome_experimento(numero, metodo,
+                                    None if movimentacao == "rota_fixa" else duracao, mapa)
 
     print(f"Metodo de SLAM informado: {metodo}")
-    print(f"Duracao planejada: {duracao:g} s simulados")
+    if movimentacao == "rota_fixa":
+        print("Duracao: determinada pelo evento ROUTE_COMPLETED; --duracao ignorada.")
+    else:
+        print(f"Duracao planejada: {duracao:g} s simulados")
     print(f"Mapa declarado: {mapa}")
     print(f"Pasta do experimento: {pasta_nome}")
+    print(f"Movimentacao: {movimentacao}")
 
     # Confere o arquivo de cenário cadastrado (não verifica o Gazebo em execução).
     nome_sdf = "tcc_world.sdf" if mapa == 1 else f"tcc_world_{mapa}.sdf"
@@ -255,6 +273,22 @@ def executar(numero, duracao, metodo, mapa):
     if elem is None or not elem.get("name"):
         raise ValueError(f"SDF sem nome interno do mundo: {sdf}")
     world_name = elem.get("name")
+
+    rota_hash = None
+    if movimentacao == "rota_fixa":
+        rota = (workspace / "src" / "tcc_slam_exploration" / "routes"
+                / f"mapa_{mapa}.json")
+        if not rota.is_file():
+            raise FileNotFoundError(
+                f"Rota do mapa {mapa} nao encontrada em {rota}. "
+                "Instale os arquivos JSON antes de executar.")
+        config_rota = json.loads(rota.read_text(encoding="utf-8"))
+        if (int(config_rota.get("mapa", -1)) != mapa
+                or config_rota.get("referencial") != "map"
+                or not config_rota.get("waypoints")
+                or config_rota.get("repetir", False)):
+            raise ValueError(f"Arquivo de rota invalido: {rota}")
+        rota_hash = hashlib.sha256(rota.read_bytes()).hexdigest()
 
     pasta = (
         workspace
@@ -321,10 +355,13 @@ def executar(numero, duracao, metodo, mapa):
             json.dumps({
                 "experimento": identificador,
                 "slam_method": metodo,
-                "duracao_configurada_s": duracao,
+                "duracao_configurada_s": None if movimentacao == "rota_fixa" else duracao,
+                "criterio_encerramento": "route_completed" if movimentacao == "rota_fixa" else "duracao_simulada",
                 "map_id": mapa,
                 "world_name": world_name,
-                "modo_experimento": "fronteiras",
+                "modo_experimento": movimentacao,
+                "rota_id": mapa if movimentacao == "rota_fixa" else None,
+                "rota_sha256": rota_hash,
                 "perfil_sensores": "nominal",
                 "nome_pasta": pasta_nome,
                 **registrar_proveniencia(workspace, sdf),
@@ -365,17 +402,21 @@ def executar(numero, duracao, metodo, mapa):
 
         print("Gravador iniciado.")
 
-        print("\nIniciando Frontier Explorer...")
+        if movimentacao == "rota_fixa":
+            print(f"\nIniciando Rota Fixa do mapa {mapa}...")
+            comando_movimentacao = [
+                "ros2", "run", "tcc_slam_exploration", "fixed_route",
+                "--ros-args", "-p", "use_sim_time:=true",
+                "-p", f"map_id:={mapa}",
+            ]
+        else:
+            print("\nIniciando Frontier Explorer...")
+            comando_movimentacao = [
+                "ros2", "run", "tcc_slam_exploration", "frontier_explorer",
+                "--ros-args", "-p", "use_sim_time:=true",
+            ]
 
-        explorador = iniciar_processo([
-            "ros2",
-            "run",
-            "tcc_slam_exploration",
-            "frontier_explorer",
-            "--ros-args",
-            "-p",
-            "use_sim_time:=true",
-        ])
+        explorador = iniciar_processo(comando_movimentacao)
 
         inicio_espera = time.monotonic()
 
@@ -391,9 +432,11 @@ def executar(numero, duracao, metodo, mapa):
                     "Retrocesso detectado no relógio simulado."
                 )
 
+            if node.rota_falhou:
+                raise RuntimeError(f"Rota fixa falhou antes de iniciar: {node.rota_erro}")
             if explorador.poll() is not None:
                 raise RuntimeError(
-                    "Frontier Explorer encerrou antes do primeiro objetivo."
+                    "Controlador de movimentacao encerrou antes do primeiro objetivo."
                 )
 
             if time.monotonic() - inicio_espera > 120:
@@ -405,9 +448,10 @@ def executar(numero, duracao, metodo, mapa):
             f"\nExperimento {identificador} iniciado."
         )
 
-        print(
-            f"Duração: {duracao} segundos simulados."
-        )
+        if movimentacao == "rota_fixa":
+            print("Aguardando ROUTE_COMPLETED (sem limite de duração experimental).")
+        else:
+            print(f"Duração: {duracao} segundos simulados.")
 
         ultimo_relatorio = -1
 
@@ -423,9 +467,19 @@ def executar(numero, duracao, metodo, mapa):
                     "Relógio simulado retrocedeu."
                 )
 
+            if node.rota_falhou:
+                raise RuntimeError(f"Trajetoria fixa interrompida: {node.rota_erro}")
+            if movimentacao == "rota_fixa" and node.rota_concluida:
+                concluido = True
+                print("Todos os waypoints concluídos com sucesso.", flush=True)
+                # Pequeno intervalo para rosbag receber e gravar ROUTE_COMPLETED.
+                final_gravacao = time.monotonic() + 1.0
+                while time.monotonic() < final_gravacao and rclpy.ok():
+                    rclpy.spin_once(node, timeout_sec=0.1)
+                break
             if explorador.poll() is not None:
                 raise RuntimeError(
-                    "Frontier Explorer encerrou inesperadamente."
+                    "Controlador de movimentacao encerrou inesperadamente."
                 )
 
             if gravador.poll() is not None:
@@ -452,17 +506,17 @@ def executar(numero, duracao, metodo, mapa):
 
                 ultimo_relatorio = intervalo
 
-                print(
-                    f"Tempo simulado: "
-                    f"{decorrido:.1f}/{duracao:.1f} s",
-                    flush=True,
-                )
+                if movimentacao == "rota_fixa":
+                    print(f"Tempo da rota: {decorrido:.1f} s simulados; "
+                          "aguardando waypoint final", flush=True)
+                else:
+                    print(f"Tempo simulado: {decorrido:.1f}/{duracao:.1f} s", flush=True)
 
-            if decorrido >= duracao:
+            if movimentacao == "fronteiras" and decorrido >= duracao:
                 concluido = True
                 break
 
-        print("\nEncerrando exploração...")
+        print("\nEncerrando movimentação...")
 
     finally:
 
@@ -482,6 +536,15 @@ def executar(numero, duracao, metodo, mapa):
             "Experimento interrompido."
         )
 
+    # Guarda os metadados reais antes da analise.
+    manifest_path = pasta.parent / "manifest.json"
+    metadados = json.loads(manifest_path.read_text(encoding="utf-8"))
+    metadados["estado_execucao"] = "gravacao_concluida"
+    metadados["duracao_observada_s"] = (node.tempo_fim_rota - node.tempo_inicial
+        if movimentacao == "rota_fixa" else duracao)
+    metadados["rota_concluida"] = bool(node.rota_concluida) if movimentacao == "rota_fixa" else None
+    manifest_path.write_text(json.dumps(metadados, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
     print("\nExecutando análise...")
 
     subprocess.run(
@@ -495,9 +558,9 @@ def executar(numero, duracao, metodo, mapa):
         check=True,
     )
 
-    print(
-        f"\nExperimento {identificador} concluído."
-    )
+    metadados["estado_execucao"] = "analisado"
+    manifest_path.write_text(json.dumps(metadados, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    print(f"\nExperimento {identificador} concluído.")
 
 
 def main():
@@ -511,7 +574,7 @@ def main():
 
     parser.add_argument(
         "--metodo",
-        choices=["toolbox", "graph", "rbpf", "ekf"],
+        choices=["graph", "rbpf", "ekf"],
         required=True,
         help="Metodo SLAM ativo no navigation.launch.py",
     )
@@ -529,6 +592,13 @@ def main():
         help="ID do mapa ativo no navigation.launch.py (ex.: 1 ou 2).",
     )
 
+    parser.add_argument(
+        "--movimentacao",
+        choices=["fronteiras", "rota_fixa"],
+        default="fronteiras",
+        help="Modo de movimentacao (padrao: fronteiras).",
+    )
+
     args = parser.parse_args()
 
     if args.numero < 0:
@@ -536,7 +606,7 @@ def main():
             "O número do experimento deve ser não negativo."
         )
 
-    if not math.isfinite(args.duracao) or args.duracao <= 0:
+    if args.movimentacao == "fronteiras" and (not math.isfinite(args.duracao) or args.duracao <= 0):
         parser.error(
             "A duração deve ser positiva."
         )
@@ -549,6 +619,7 @@ def main():
         args.duracao,
         args.metodo,
         args.mapa,
+        args.movimentacao,
     )
 
 

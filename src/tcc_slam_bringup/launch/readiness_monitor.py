@@ -24,9 +24,9 @@ from tf2_ros import Buffer, TransformListener
 
 class ReadinessMonitor(Node):
 
-    def __init__(self, mode):
+    def __init__(self, mode, node_name=None):
 
-        super().__init__("readiness_monitor_" + mode)
+        super().__init__(node_name or ("readiness_monitor_" + mode))
 
         self.mode = mode
 
@@ -269,11 +269,16 @@ def main():
         required=True,
     )
 
+    parser.add_argument("--node-name", default=None)
+    parser.add_argument("--timeout", type=float, default=0.0,
+                        help="Tempo maximo de espera em segundos reais; zero desativa.")
+
     args = parser.parse_args()
 
     rclpy.init()
 
-    node = ReadinessMonitor(args.mode)
+    node = ReadinessMonitor(args.mode, args.node_name)
+    inicio_espera = time.monotonic()
 
     try:
 
@@ -283,6 +288,11 @@ def main():
                 node,
                 timeout_sec=0.2,
             )
+            if args.timeout > 0 and time.monotonic() - inicio_espera >= args.timeout:
+                node.get_logger().error(
+                    f"TIMEOUT: prontidao {args.mode} nao atingida apos {args.timeout:.0f}s reais."
+                )
+                break
 
         success = node.ready
 

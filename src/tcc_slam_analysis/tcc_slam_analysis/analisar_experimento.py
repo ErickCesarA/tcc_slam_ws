@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# TCC_ROUTE_END_V1
 
 import argparse
 import json
@@ -321,6 +322,7 @@ def ler_rosbag(caminho, storage_id):
                 "resolucao": resolucao,
                 "origem_x": float(msg.info.origin.position.x),
                 "origem_y": float(msg.info.origin.position.y),
+                "origem_theta": quaternion_yaw(msg.info.origin.orientation),
                 "frame_id": msg.header.frame_id,
             }
 
@@ -462,6 +464,7 @@ def recuperar_mapa_final_no_intervalo(caminho, storage_id, inicio, fim):
             "resolucao": float(msg.info.resolution),
             "origem_x": float(msg.info.origin.position.x),
             "origem_y": float(msg.info.origin.position.y),
+                "origem_theta": quaternion_yaw(msg.info.origin.orientation),
             "frame_id": msg.header.frame_id,
         }
         ultimo_tempo = t
@@ -1113,6 +1116,11 @@ def gerar_relatorio_visual(pasta, resultados, tabela_odom, tabela_slam,
         figuras.append(("graficos/" + arquivo, titulo, interpretacao))
 
     metodo = str(resultados.get("experimento_metodo_slam", "nao_informado"))
+    rota_fixa = resultados.get("experimento_modo_movimentacao") == "rota_fixa"
+    titulo_relatorio = ("Relatorio de percurso com rota fixa" if rota_fixa
+                        else "Relatorio de exploracao autonoma")
+    descricao_intervalo = ("Finalizado apos ultimo waypoint" if rota_fixa
+                          else "Finalizado por tempo simulado")
 
     # 1. Trajetorias alinhadas: a comparacao e da geometria, nao da rota do Nav2.
     fig, ax = plt.subplots(figsize=(8, 6))
@@ -1194,7 +1202,7 @@ def gerar_relatorio_visual(pasta, resultados, tabela_odom, tabela_slam,
         fig, ax = plt.subplots(figsize=(10, 3.8))
         ax.bar(["Enviados", "Alcançados", "Falhos", "Erros",
                 "Rejeitados", "Cancelados", "Trocas"], contagens)
-        ax.set(title="Eventos da navegação autônoma", ylabel="Ocorrências")
+        ax.set(title="Eventos da rota fixa" if rota_fixa else "Eventos da navegação autônoma", ylabel="Ocorrências")
         ax.tick_params(axis="x", labelrotation=20)
         ax.grid(axis="y", alpha=.25)
         salvar(fig, "eventos.png", "Objetivos de navegação",
@@ -1239,18 +1247,30 @@ def gerar_relatorio_visual(pasta, resultados, tabela_odom, tabela_slam,
         except (ValueError, TypeError):
             return "Indisponível"
 
-    kpis = [
-        ("Método", escape(metodo.upper()), "Algoritmo declarado no experimento"),
-        ("Duração analisada", numero("experimento_duracao_analisada_s", 1) + " s", "Tempo efetivo disponível"),
-        ("ATE SLAM", numero("slam_ATE_m_RMSE") + " m", "RMSE translacional; menor é melhor"),
-        ("ATE odometria", numero("odom_ATE_m_RMSE") + " m", "Referência de comparação"),
-        ("ATE angular SLAM", numero("slam_ATE_angular_graus_RMSE") + "°", "RMSE da orientação"),
-        ("Área acrescentada", numero("mapa_variacao_area_conhecida_m2", 2) + " m²", "Variação da área conhecida"),
-        ("Metas alcançadas", numero("exploracao_objetivos_alcancados", 0), "Não inclui metas pendentes"),
-        ("Trocas de destino", numero("exploracao_trocas_meta", 0), "Replanejamento dinâmico V4"),
-        ("Metas canceladas", numero("exploracao_objetivos_cancelados", 0), "Cancelamento não equivale a falha"),
-        ("Execução completa", "SIM" if resultados.get("experimento_intervalo_completo") else "NÃO", "Conferência da duração requerida"),
-    ]
+    if rota_fixa:
+        kpis = [
+            ("Metodo", escape(metodo.upper()), "Metodo SLAM utilizado"),
+            ("Conclusao", "SIM" if resultados.get("rota_concluida") else "NAO", descricao_intervalo),
+            ("Tempo da rota", numero("rota_tempo_execucao_s", 2) + " s", "Tempo simulado entre primeiro objetivo e conclusao"),
+            ("Pontos alcancados", f"{numero('rota_waypoints_alcancados',0)} / {numero('rota_waypoints_planejados',0)}", "Waypoints reportados como concluidos pelo Nav2"),
+            ("Distancia real", numero("rota_distancia_real_m", 2) + " m", "Deslocamento medido usando ground truth"),
+            ("Velocidade media", numero("rota_velocidade_media_m_s", 2) + " m/s", "Distancia real / tempo de percurso"),
+            ("ATE SLAM", numero("slam_ATE_m_RMSE") + " m", "Precisao global de posicao"),
+            ("RPE 1 s", numero("slam_RPE_1s_translacao_m_RMSE") + " m", "Consistencia relativa de movimento"),
+            ("Area conhecida", numero("mapa_area_final_m2",2) + " m²", "Informativo: depende do percurso efetivo"),
+        ]
+    else:
+        kpis = [
+            ("Metodo", escape(metodo.upper()), "Algoritmo declarado no experimento"),
+            ("Duracao analisada", numero("experimento_duracao_analisada_s",1) + " s", "Janela experimental"),
+            ("ATE SLAM", numero("slam_ATE_m_RMSE") + " m", "Precisao global de posicao"),
+            ("ATE odometria", numero("odom_ATE_m_RMSE") + " m", "Referencia de comparacao"),
+            ("Area acrescentada", numero("mapa_variacao_area_conhecida_m2",2) + " m²", "Expansao da area conhecida"),
+            ("Metas alcancadas", numero("exploracao_objetivos_alcancados",0), "Objetivos atingidos"),
+            ("Metas canceladas", numero("exploracao_objetivos_cancelados",0), "Cancelamento nao equivale a falha"),
+            ("Trocas de destino", numero("exploracao_trocas_meta",0), "Replanejamento dinamico"),
+            ("Intervalo completo", "SIM" if resultados.get("experimento_intervalo_completo") else "NAO", "Conferencia do tempo solicitado"),
+        ]
     cards = "\n".join(
         f'<div class="card"><div class="card-title">{titulo}</div><div class="number">{valor}</div><small>{nota}</small></div>'
         for titulo, valor, nota in kpis
@@ -1268,7 +1288,7 @@ def gerar_relatorio_visual(pasta, resultados, tabela_odom, tabela_slam,
     )
     html = f"""<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>Experimento SLAM — {escape(metodo.upper())}</title>
+    <title>{escape(titulo_relatorio)} — {escape(metodo.upper())}</title>
     <style>
     :root {{font-family:system-ui,Arial,sans-serif;color:#192438;background:#f3f6fb}}
     body {{margin:0}}header {{background:#10233f;color:white;padding:42px max(24px,calc((100vw - 1100px)/2))}}
@@ -1280,9 +1300,9 @@ def gerar_relatorio_visual(pasta, resultados, tabela_odom, tabela_slam,
     section img {{width:100%;height:auto;display:block;object-fit:contain}}
     h1 {{margin:0 0 8px}}h2 {{font-size:1.25rem}}footer {{padding:24px 0;color:#53677c}}
     </style></head><body>
-    <header><h1>Relatório visual de experimento SLAM</h1>
-    <div>Método: {escape(metodo.upper())} · Início simulado absoluto: {numero('experimento_inicio_simulado_s',2)} s
-    · Duração solicitada: {numero('experimento_duracao_configurada_s',1)} s</div></header>
+    <header><h1>{escape(titulo_relatorio)}</h1>
+    <div>Metodo: {escape(metodo.upper())} · Inicio simulado: {numero('experimento_inicio_simulado_s',2)} s
+    · Duracao analisada: {numero('experimento_duracao_analisada_s',1)} s · {escape(descricao_intervalo)}</div></header>
     <main><div class="grid">{cards}</div>
     <section><h2>Como interpretar</h2><p>{escape(notas)}</p><p>{escape(mapa_status)}</p></section>
     {blocos}<footer>Relatório gerado localmente a partir dos dados da rosbag. Dados tabulares disponíveis nos arquivos CSV do mesmo diretório.</footer>
@@ -1310,6 +1330,12 @@ def main():
         "--storage-id",
         choices=["mcap", "sqlite3"],
         default="mcap",
+    )
+
+    parser.add_argument(
+        "--movimentacao", choices=["fronteiras", "rota_fixa"],
+        default="fronteiras",
+        help="Exploracao por fronteiras ou percurso fixo com fim por ROUTE_COMPLETED.",
     )
 
     parser.add_argument(
@@ -1343,7 +1369,7 @@ def main():
 
     args = parser.parse_args()
 
-    if args.duracao <= 0:
+    if args.movimentacao == "fronteiras" and args.duracao <= 0:
         parser.error(
             "A duração deve ser maior que zero."
         )
@@ -1380,7 +1406,7 @@ def main():
     print("====================================")
 
     print(f"Metodo declarado: {args.metodo}")
-    print(f"Duracao solicitada: {args.duracao:g} s simulados")
+    print(f"Modo: {args.movimentacao}; duracao: " + ("definida por ROUTE_COMPLETED" if args.movimentacao == "rota_fixa" else f"{args.duracao:g} s simulados"))
     print("\nLendo rosbag...")
 
     dados = ler_rosbag(
@@ -1424,27 +1450,42 @@ def main():
         primeiros_objetivos["tempo_s"].min()
     )
 
-    fim_previsto = inicio + args.duracao
-
-    # A disponibilidade dos dados nao deve ser confundida com
-    # a duracao solicitada. Nao extrapolamos metricas alem do clock.
+    # TCC_ROUTE_END_INTERVAL: modo fronteiras termina por duracao;
+    # rota fixa termina EXCLUSIVAMENTE por ROUTE_COMPLETED de Nav2.
     clocks = np.asarray(dados["clocks"], dtype=float)
     clocks_validos = clocks[np.isfinite(clocks) & (clocks >= inicio)]
     if len(clocks_validos) == 0:
         raise RuntimeError("Nao ha /clock valido apos o primeiro GOAL_SENT.")
     ultimo_clock = float(np.max(clocks_validos))
-    fim = min(fim_previsto, ultimo_clock)
+
+    if args.movimentacao == "rota_fixa":
+        fim_eventos = eventos[eventos["event"] == "ROUTE_COMPLETED"]
+        if fim_eventos.empty:
+            raise RuntimeError("Rota fixa sem ROUTE_COMPLETED na rosbag. "
+                               "Nao e um experimento de rota concluida.")
+        fim_previsto = float(fim_eventos["tempo_s"].iloc[-1])
+        falhas = eventos[(eventos["event"] == "ROUTE_FAILED") &
+                         (eventos["tempo_s"] <= fim_previsto)]
+        if not falhas.empty:
+            raise RuntimeError("Ha ROUTE_FAILED antes da conclusao da rota.")
+        if fim_previsto <= inicio:
+            raise RuntimeError("Evento ROUTE_COMPLETED antes do primeiro GOAL_SENT.")
+        if ultimo_clock < fim_previsto - 0.15:
+            raise RuntimeError("Rosbag terminou antes de ROUTE_COMPLETED; intervalo incompleto.")
+        fim = fim_previsto
+        intervalo_completo = True
+        print("Rota completa identificada na rosbag.")
+    else:
+        fim_previsto = inicio + args.duracao
+        fim = min(fim_previsto, ultimo_clock)
+        intervalo_completo = bool(ultimo_clock >= fim_previsto - 0.1)
+        if not intervalo_completo:
+            print("AVISO: gravacao incompleta em relacao a duracao solicitada.")
     if fim <= inicio:
         raise RuntimeError("Duracao observada insuficiente para analisar.")
-
     duracao_observada = fim - inicio
-    intervalo_completo = bool(ultimo_clock >= fim_previsto - 0.1)
-    print(f"\nInicio no relogio simulado (absoluto): {inicio:.3f} s")
-    print(f"Fim previsto no relogio simulado (absoluto): {fim_previsto:.3f} s")
-    print(f"Duracao solicitada: {args.duracao:.3f} s")
-    print(f"Duracao disponivel para analise: {duracao_observada:.3f} s")
-    if not intervalo_completo:
-        print("AVISO: gravacao incompleta em relacao a duracao solicitada.")
+    print(f"\nInicio simulado: {inicio:.3f} s | Fim: {fim:.3f} s")
+    print(f"Duracao analisada: {duracao_observada:.3f} s | Modo: {args.movimentacao}")
 
     # --------------------------------------------------------
     # ANÁLISE DA ODOMETRIA
@@ -1471,7 +1512,9 @@ def main():
         "experimento_inicio_simulado_s": inicio,
         "experimento_fim_previsto_s": fim_previsto,
         "experimento_fim_analisado_s": fim,
-        "experimento_duracao_configurada_s": args.duracao,
+        "experimento_duracao_configurada_s": (args.duracao if args.movimentacao == "fronteiras" else np.nan),
+        "experimento_modo_movimentacao": args.movimentacao,
+        "experimento_criterio_encerramento": ("route_completed" if args.movimentacao == "rota_fixa" else "duracao_simulada"),
         "experimento_duracao_analisada_s": duracao_observada,
         "experimento_alinhamento": args.alinhamento,
     }
@@ -1579,9 +1622,30 @@ def main():
         )
     )
 
-    resultados.update(
-        metricas_exploracao
-    )
+    resultados.update(metricas_exploracao)
+
+    if args.movimentacao == "rota_fixa":
+        # O evento ROUTE_STARTED ocorre antes do GOAL_SENT e, portanto,
+        # deve ser lido do conjunto de eventos completo.
+        inicio_rota = eventos[eventos["event"] == "ROUTE_STARTED"]
+        waypoints = np.nan
+        if not inicio_rota.empty and "waypoints" in inicio_rota.columns:
+            totais = pd.to_numeric(inicio_rota["waypoints"], errors="coerce").dropna()
+            if not totais.empty:
+                waypoints = int(totais.iloc[-1])
+        concluidos = int(metricas_exploracao.get("exploracao_objetivos_alcancados", 0))
+        distancia_rota = resultados.get("odom_distancia_referencia_m", np.nan)
+        resultados.update({
+            "rota_concluida": True,
+            "rota_waypoints_planejados": waypoints,
+            "rota_waypoints_alcancados": concluidos,
+            "rota_taxa_waypoints_alcancados_percentual": (100*concluidos/waypoints if np.isfinite(waypoints) and waypoints > 0 else np.nan),
+            "rota_tempo_execucao_s": duracao_observada,
+            "rota_distancia_real_m": distancia_rota,
+            "rota_velocidade_media_m_s": (distancia_rota/duracao_observada if np.isfinite(distancia_rota) and duracao_observada>0 else np.nan),
+        })
+        # Os eventos ainda sao salvos em eventos_exploracao.csv por compatibilidade.
+
 
     if not eventos_filtrados.empty:
 
@@ -1660,6 +1724,13 @@ def main():
         pasta_resultados, resultados, tabela_odom, tabela_slam,
         evolucao, eventos_filtrados, imagem_mapa, inicio,
     )
+    # TCC_ETAPA3_GEOMETRIA: usa a mesma grade final que o relatório visual.
+    # A função recuperar_mapa_final_no_intervalo evita leituras posteriores
+    # ao encerramento da exploração ou ao evento ROUTE_COMPLETED.
+    dados["mapa_final"] = imagem_mapa
+    from tcc_slam_analysis.integrar_geometria_tcc import integrar as integrar_geometria
+    integrar_geometria(bag, pasta_resultados, dados, inicio, fim)
+
     print(f"Relatorio visual: {relatorio}")
     # TCC_PDF_AUTOMATICO_V1
     try:

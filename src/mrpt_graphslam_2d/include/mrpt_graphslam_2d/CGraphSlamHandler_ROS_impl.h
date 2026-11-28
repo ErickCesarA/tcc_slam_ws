@@ -537,7 +537,12 @@ bool CGraphSlamHandler_ROS<GRAPH_T>::usePublishersBroadcasters()
     const double s = std::sin(yaw_correction);
 
     geometry_msgs::msg::TransformStamped map_to_odom;
-    map_to_odom.header.stamp = timestamp;
+    // A janela curta de atraso do DDS/TF pode deixar o TF alguns ms atras do
+    // relogio simulado. Datacao adiantada apenas para map->odom (100 ms),
+    // mantendo a transformacao numerica e os timestamps das medidas intactos.
+    // Mesmo valor aplicado a todas as execucoes deste metodo.
+    map_to_odom.header.stamp =
+      static_cast<builtin_interfaces::msg::Time>(timestamp + rclcpp::Duration::from_seconds(0.10));
     map_to_odom.header.frame_id = m_anchor_frame_id;
     map_to_odom.child_frame_id = m_odom_frame_id;
     map_to_odom.transform.translation.x =
@@ -609,26 +614,17 @@ bool CGraphSlamHandler_ROS<GRAPH_T>::usePublishersBroadcasters()
   }
 
         // Odometry trajectory - nav_msgs::msg::Path
-  m_odom_trajectory_pub->publish(m_odom_path);
+  // Historico completo de odometria cresce durante a rota. Publicar 20 vezes/s
+  // custava serializar todo o historico repetidamente; manter somente 2 Hz.
+  // Ele nao e usado no SLAM
+  // ou no rosbag do experimento (que grava /odom diretamente).
+  if (m_pub_seq % 10 == 0) {
+    m_odom_trajectory_pub->publish(m_odom_path);
+  }
   
-        // ============================================================
-        // DIAGNOSTICO TEMPORARIO - PUBLICACAO DO MAPA
-        // ============================================================
+  // Gera a grade apenas quando o grafo ganhou nos; sem logs de debug a 20 Hz.
   const auto current_nodes = this->m_engine->getGraph().nodeCount();
-
-  RCLCPP_INFO(
-      this->get_logger(),
-      "[GRAPHSLAM DEBUG] Nos atuais: %zu | Nos anteriores: %zu",
-      static_cast<size_t>(current_nodes),
-      static_cast<size_t>(m_graph_nodes_last_size)
-  );
-
   if (current_nodes > m_graph_nodes_last_size) {
-
-      RCLCPP_INFO(
-          this->get_logger(),
-          "[GRAPHSLAM DEBUG] Gerando mapa..."
-      );
 
       std_msgs::msg::Header h;
       mrpt::system::TTimeStamp mrpt_time;
@@ -636,11 +632,6 @@ bool CGraphSlamHandler_ROS<GRAPH_T>::usePublishersBroadcasters()
       auto mrpt_gridmap = mrpt::maps::COccupancyGridMap2D::Create();
 
       this->m_engine->getMap(mrpt_gridmap, &mrpt_time);
-
-      RCLCPP_INFO(
-          this->get_logger(),
-          "[GRAPHSLAM DEBUG] Mapa MRPT gerado."
-      );
 
       h.stamp = this->now();
       h.frame_id = m_anchor_frame_id;
@@ -653,17 +644,11 @@ bool CGraphSlamHandler_ROS<GRAPH_T>::usePublishersBroadcasters()
           h
       );
 
-      RCLCPP_INFO(
-          this->get_logger(),
-          "[GRAPHSLAM DEBUG] Publicando mapa: %u x %u",
-          nav_gridmap.info.width,
-          nav_gridmap.info.height
-      );
-
       m_gridmap_pub->publish(nav_gridmap);
   }
-        // GraphSlamStats publishing
-  {
+        // Estatisticas de diagnostico a 2 Hz, nao 20 Hz. O grafo e o mapa
+        // continuam calculados e publicados de acordo com os mesmos criterios.
+  if (m_pub_seq % 10 == 0) {
     mrpt_msgs::msg::GraphSlamStats stats;
     stats.header.stamp = this->now();
 
